@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, Comment, Plus, Chevron } from '../common/Icons'
+import { Plus, Chevron } from '../common/Icons'
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -65,6 +65,11 @@ const CM_TRENDING = [
 ]
 
 const TREND_COLORS = ['#3B5BFF', '#7A5BFF', '#D97757', '#16A34A']
+const SUMMARY_HEADLINES = {
+  'th-1': '개인 사유로 적는 게 가장 무난해요',
+  'th-2': '혼밥은 꽤 자연스러운 선택이에요',
+  'th-3': '완료, 진행, 다음 계획 순서가 깔끔해요',
+}
 
 // ─── Thread card ──────────────────────────────────────────────────────────────
 function ThreadCard({ thread: th, expanded, onToggle, onAskAI }) {
@@ -77,56 +82,33 @@ function ThreadCard({ thread: th, expanded, onToggle, onAskAI }) {
         : 'var(--shadow-sm)',
       overflow: 'hidden',
     }}>
-      {/* Merge indicator */}
-      <div style={{
-        padding: '10px 14px 9px',
-        background: th.hot ? 'linear-gradient(90deg, #F5F7FF 0%, #FBFBFE 100%)' : 'var(--card-2)',
-        borderBottom: '1px solid var(--line-2)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Avatar stack */}
-          <div style={{ display: 'inline-flex' }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                width: 20, height: 20, borderRadius: 99, border: '1.5px solid #fff',
-                background: `hsl(${220 + i * 20},60%,${70 - i * 8}%)`,
-                marginLeft: i === 0 ? 0 : -6,
-                fontSize: 8, color: '#fff', fontWeight: 700,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}>Q</div>
-            ))}
-          </div>
-          <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
-            <path d="M1 4h10M8 1l3 3-3 3" stroke="#9AA1AE" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {/* AI badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--brand-soft)', borderRadius: 99, padding: '2px 8px' }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
-            </svg>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--brand)' }}>
-              {th.merged.toLocaleString()}개 질문 병합
-            </span>
-          </div>
-        </div>
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted-2)', background: 'var(--line-2)', padding: '2px 7px', borderRadius: 99 }}>{th.tag}</span>
-      </div>
-
       {/* Question + stats */}
       <button onClick={onToggle} style={{
         width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer',
-        padding: '14px 14px 10px',
+        padding: '14px 14px 12px',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10,
       }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted-2)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 6 }}>Q.</div>
-          <div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-.025em', lineHeight: 1.35, color: 'var(--ink)', textAlign: 'left' }}>{th.question}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, fontSize: 13, color: 'var(--muted-2)' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Heart s={11} /> {th.likeCount.toLocaleString()}</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Comment s={11} /> {th.commentCount}</span>
-            <span>· 조회 {th.viewCount}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+              <div style={{ display: 'inline-flex', flexShrink: 0 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{
+                    width: 20, height: 20, borderRadius: 99, border: '1.5px solid #fff',
+                    background: `hsl(${220 + i * 20},60%,${70 - i * 8}%)`,
+                    marginLeft: i === 0 ? 0 : -6,
+                    fontSize: 8, color: '#fff', fontWeight: 700,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  }}>Q</div>
+                ))}
+              </div>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--brand)', whiteSpace: 'nowrap' }}>
+                {th.merged.toLocaleString()}개 질문 병합
+              </span>
+            </div>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted-2)', background: 'var(--line-2)', padding: '2px 7px', borderRadius: 99, flexShrink: 0 }}>{th.tag}</span>
           </div>
+          <div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-.025em', lineHeight: 1.35, color: 'var(--ink)', textAlign: 'left' }}>{th.question}</div>
         </div>
         <div style={{ marginTop: 2, color: '#9AA1AE', flexShrink: 0 }}>
           <Chevron s={16} dir={expanded ? 'up' : 'down'} />
@@ -136,22 +118,13 @@ function ThreadCard({ thread: th, expanded, onToggle, onAskAI }) {
       {expanded && (
         <>
           {/* AI 핵심 요약 */}
-          <div style={{ margin: '0 14px 12px', background: 'linear-gradient(135deg, #F5F7FF 0%, #FAFBFF 100%)', border: '1px solid #DCE3FF', borderRadius: 12, padding: '12px 12px 10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
-              </svg>
-              <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--brand)' }}>AI 핵심 요약</span>
-              <span style={{ fontSize: 10, color: 'var(--muted-2)', marginLeft: 'auto' }}>{th.merged.toLocaleString()}개 답변 기반</span>
-            </div>
-            <p style={{ margin: 0, fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6 }}>{th.aiSummary}</p>
-            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 10 }}>
-              {th.aiTags.map((t, i) => (
-                <span key={i} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--brand)', background: 'rgba(59,91,255,.08)', padding: '2px 8px', borderRadius: 99 }}>
-                  {t}
-                </span>
-              ))}
-            </div>
+          <div style={{ margin: '0 14px 12px', background: '#fff', border: '1px solid var(--line-2)', borderRadius: 12, padding: '12px 12px 11px' }}>
+            <p style={{ display: 'inline', margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: '-.025em', lineHeight: 1.35, color: 'var(--ink)', background: 'rgba(160,237,224,.3)' }}>
+              {SUMMARY_HEADLINES[th.id]}
+            </p>
+            <p style={{ margin: '9px 0 0', fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+              {th.aiSummary}
+            </p>
           </div>
 
           {/* 커뮤니티 의견 */}
@@ -185,25 +158,32 @@ function ThreadCard({ thread: th, expanded, onToggle, onAskAI }) {
 
           {/* CTAs */}
           <div style={{ display: 'flex', gap: 8, padding: '14px' }}>
-            <button style={{
-              flex: 1, padding: '10px 0', background: '#fff', border: '1px solid var(--line)',
-              borderRadius: 12, fontSize: 14, fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer',
+            <button
+              onClick={() => onAskAI?.({
+                type: 'community',
+                title: th.question,
+                meta: `${th.merged.toLocaleString()}개 질문 병합 · ${th.tag}`,
+                summary: SUMMARY_HEADLINES[th.id],
+                body: th.aiSummary,
+              })}
+              style={{
+              flex: 1, padding: '10px 0', background: '#fff', border: '1px dashed rgba(59,91,255,.35)',
+              borderRadius: 12, fontSize: 14, fontWeight: 600, color: 'var(--brand)', cursor: 'pointer',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
-              <Comment s={14} /> 내 의견 남기기
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
+              </svg>
+              AI에게 물어보기
             </button>
             <button
-              onClick={() => onAskAI?.(th.question)}
               style={{
-                flex: 1.4, padding: '10px 0', background: 'var(--brand)',
+                flex: 1, padding: '10px 0', background: 'var(--brand)',
                 border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, color: '#fff', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 boxShadow: '0 4px 12px -4px rgba(59,91,255,.4)',
               }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
-              </svg>
-              AI와 더 깊게 대화하기
+              자세히 보기
             </button>
           </div>
         </>
@@ -221,7 +201,7 @@ export default function CommunityScreen({ onAskAI }) {
   const max = CM_TRENDING[0].count
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', paddingTop: 44, minHeight: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       {/* Header */}
       <header style={{ padding: '14px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -268,6 +248,56 @@ export default function CommunityScreen({ onAskAI }) {
 
       {/* Feed */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px 100px' }}>
+        {/* Thread list */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.02em', color: 'var(--ink)' }}>활발한 논의</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
+          {CM_THREADS.map(th => (
+            <ThreadCard
+              key={th.id}
+              thread={th}
+              expanded={!!expanded[th.id]}
+              onToggle={() => toggleExpand(th.id)}
+              onAskAI={onAskAI}
+            />
+          ))}
+        </div>
+
+        {/* Community summary */}
+        <div style={{
+          background: '#fff',
+          border: '1px solid var(--line-2)',
+          borderRadius: 16,
+          padding: '14px 14px 13px',
+          marginBottom: 24,
+          boxShadow: 'var(--shadow-sm)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.02em', color: 'var(--ink)' }}>
+              커뮤니티 요약
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '2px 7px', borderRadius: 99 }}>
+              오늘
+            </span>
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, fontWeight: 500 }}>
+            연차 사유, 점심 혼밥, 주간 보고처럼 바로 내일 써먹을 수 있는 회사생활 질문이 활발해요.
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 12 }}>
+            {[
+              { label: '새 글', value: '128' },
+              { label: '댓글', value: '757' },
+              { label: '핫이슈', value: '12' },
+            ].map(item => (
+              <div key={item.label} style={{ background: 'var(--line-2)', borderRadius: 12, padding: '9px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Trending — visual bar style */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -303,21 +333,6 @@ export default function CommunityScreen({ onAskAI }) {
           </div>
         </div>
 
-        {/* Thread list */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.02em', color: 'var(--ink)' }}>활발한 논의</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {CM_THREADS.map(th => (
-            <ThreadCard
-              key={th.id}
-              thread={th}
-              expanded={!!expanded[th.id]}
-              onToggle={() => toggleExpand(th.id)}
-              onAskAI={onAskAI}
-            />
-          ))}
-        </div>
       </div>
 
       {/* FAB */}

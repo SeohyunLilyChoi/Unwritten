@@ -7,10 +7,10 @@ import MyPageScreen from './components/screens/MyPageScreen'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home')
-  const [prefillText, setPrefillText] = useState('')
+  const [prefillContent, setPrefillContent] = useState(null)
 
-  const handleAskAI = (text) => {
-    setPrefillText(text)
+  const handleAskAI = (content) => {
+    setPrefillContent(content)
     setActiveTab('home')
   }
 
@@ -19,8 +19,8 @@ export default function App() {
       case 'home':
         return (
           <HomeScreen
-            prefillText={prefillText}
-            onClearPrefill={() => setPrefillText('')}
+            prefillContent={prefillContent}
+            onClearPrefill={() => setPrefillContent(null)}
           />
         )
       case 'content':

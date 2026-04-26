@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   mockData,
@@ -12,6 +18,11 @@ import {
 } from "../../data/mockData";
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+const composerPlaceholders = [
+  "출근 몇시까지 해야할까?",
+  "점심 혼자 먹어도 될까?",
+  "퇴근하고 싶어",
+];
 
 // ─── Skeleton ──────────────────────────────────────────────────────────────────
 function Skeleton({ className = "" }) {
@@ -73,17 +84,37 @@ function DataCard({ dataCard, job, years, onJobChange, onYearsChange }) {
           </p>
         </div>
         <button
-          onClick={() => { onJobChange(me.job); onYearsChange(me.years); }}
-          className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+          onClick={() => {
+            onJobChange(me.job);
+            onYearsChange(me.years);
+          }}
+          className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-[11px] font-semibold border transition-colors ${
             isMyProfile
-              ? "bg-brand-blue-light text-brand-blue border-[#C9D1FF]"
+              ? "bg-white text-brand-blue border-brand-blue"
               : "bg-white text-gray-500 border-gray-200"
           }`}
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="3.5" />
-            <path d="M4.5 20c0-4 3.5-6 7.5-6s7.5 2 7.5 6" />
-          </svg>
+          <span
+            className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center ${
+              isMyProfile
+                ? "bg-brand-blue border-brand-blue text-white"
+                : "bg-white border-gray-300"
+            }`}
+          >
+            {isMyProfile && (
+              <svg
+                className="w-2.5 h-2.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12l4 4L19 6" />
+              </svg>
+            )}
+          </span>
           내 프로필
         </button>
       </div>
@@ -181,14 +212,30 @@ function CommunityRow({ item }) {
         <span>{item.role}</span>
         <span className="w-0.5 h-0.5 bg-gray-300 rounded-full" />
         <span className="flex items-center gap-0.5">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />
           </svg>
           {item.likes}
         </span>
         <span className="flex items-center gap-0.5">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z"/>
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" />
           </svg>
           {item.comments}
         </span>
@@ -357,6 +404,163 @@ function FeedbackStrip({
   );
 }
 
+// ─── AttachmentPreview ────────────────────────────────────────────────────────
+function AttachmentPreview({ attachment, onRemove, onOpen, className = "" }) {
+  if (!attachment || !["poll", "community"].includes(attachment.type)) return null;
+  const label = attachment.type === "poll" ? "투표" : "논의";
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen?.(attachment)}
+      className={`inline-flex max-w-full text-left rounded-xl border border-brand-blue/20 bg-brand-blue-light px-3 py-2 items-start gap-2 cursor-pointer active:bg-[#E3E8FF] ${className}`}
+    >
+      <div className="shrink-0 mt-0.5 rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold text-brand-blue">
+        {label}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-bold text-gray-900 leading-snug line-clamp-2">
+          {attachment.title}
+        </p>
+        {attachment.meta && (
+          <p className="mt-0.5 text-[11px] text-gray-400">{attachment.meta}</p>
+        )}
+      </div>
+      {onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="shrink-0 text-gray-400"
+          aria-label="첨부 제거"
+          type="button"
+        >
+          <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 6l12 12M18 6L6 18"
+            />
+          </svg>
+        </button>
+      )}
+    </button>
+  );
+}
+
+function AttachmentModal({ attachment, onClose }) {
+  if (!attachment) return null;
+
+  const top = Math.max(...(attachment.options || []).map((o) => o.pct));
+  const isPoll = attachment.type === "poll";
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-[80] bg-black/40 flex items-center justify-center px-5"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="w-full max-w-[382px] rounded-2xl bg-white p-4 shadow-xl"
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 12, scale: 0.98 }}
+          transition={{ duration: 0.18 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <span className="inline-flex rounded-md bg-brand-blue-light px-2 py-1 text-[11px] font-bold text-brand-blue">
+                {isPoll ? "투표 결과" : "활발한 논의"}
+              </span>
+              <h3 className="mt-2 text-[15px] font-bold leading-snug text-gray-900">
+                {attachment.title}
+              </h3>
+              {attachment.meta && (
+                <p className="mt-1 text-xs text-gray-400">{attachment.meta}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="shrink-0 text-gray-400"
+              aria-label="닫기"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 6l12 12M18 6L6 18"
+                />
+              </svg>
+            </button>
+          </div>
+          {isPoll ? (
+            <div className="flex flex-col gap-2">
+              {(attachment.options || []).map((option, index) => {
+                const isTop = option.pct === top;
+                return (
+                  <div
+                    key={`${option.label}-${index}`}
+                    className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-3 py-2.5"
+                  >
+                    <div
+                      className={`absolute inset-y-0 left-0 ${isTop ? "bg-brand-blue-light" : "bg-gray-100"}`}
+                      style={{ width: `${option.pct}%` }}
+                    />
+                    <div className="relative z-10 flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold text-gray-700">
+                        {option.label}
+                      </span>
+                      <span
+                        className={`text-sm font-bold ${isTop ? "text-brand-blue" : "text-gray-400"}`}
+                      >
+                        {option.pct}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div>
+              {attachment.summary && (
+                <p
+                  className="inline text-[16px] font-bold leading-snug text-gray-900"
+                  style={{ background: "rgba(160, 237, 224, 0.3)" }}
+                >
+                  {attachment.summary}
+                </p>
+              )}
+              {attachment.body && (
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                  {attachment.body}
+                </p>
+              )}
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ─── FollowUpItem ─────────────────────────────────────────────────────────────
 function FollowUpItem({ item }) {
   return (
@@ -382,7 +586,7 @@ function FollowUpItem({ item }) {
           <p className="text-sm font-bold text-gray-900 mb-1">
             {item.aiAnswer.headline}
           </p>
-          <p className="text-sm text-brand-blue underline underline-offset-2 decoration-brand-blue/40 mb-1">
+          <p className="text-sm text-gray-600 mb-1">
             {item.aiAnswer.highlight}
           </p>
           <p className="text-xs text-gray-400">{item.aiAnswer.body}</p>
@@ -496,10 +700,13 @@ function AIAnswerBody({
 
   return (
     <div>
-      <p className="text-[17px] font-bold text-gray-900 leading-snug mb-2">
+      <p
+        className="inline text-[17px] font-bold text-gray-900 leading-snug"
+        style={{ background: "rgba(160, 237, 224, 0.3)" }}
+      >
         {aiAnswer.headline}
       </p>
-      <p className="text-sm text-brand-blue underline underline-offset-2 decoration-brand-blue/40 mb-1.5">
+      <p className="mt-2 text-sm text-gray-600 mb-1.5">
         {aiAnswer.highlight}
       </p>
 
@@ -507,7 +714,7 @@ function AIAnswerBody({
         <ul className="mt-4 flex flex-col gap-2.5">
           {aiAnswer.takeaways.map((t, i) => (
             <li key={i} className="flex gap-2.5 items-start">
-              <span className="shrink-0 w-[18px] h-[18px] rounded-[6px] bg-brand-blue-light text-brand-blue text-[11px] font-bold flex items-center justify-center mt-0.5">
+              <span className="shrink-0 w-[18px] h-[18px] text-brand-blue text-[11px] font-bold flex items-center justify-center mt-0.5">
                 {i + 1}
               </span>
               <span className="text-sm text-gray-600 leading-relaxed">{t}</span>
@@ -567,10 +774,11 @@ function ThreadContent({
   years,
   onJobChange,
   onYearsChange,
+  onOpenAttachment,
 }) {
-  const answered = !thread.isLoadingAnswer && thread.aiAnswer
-  const hasData = answered && thread.aiAnswer.dataCard
-  const hasPosts = answered && thread.aiAnswer.communityPosts?.length > 0
+  const answered = !thread.isLoadingAnswer && thread.aiAnswer;
+  const hasData = answered && thread.aiAnswer.dataCard;
+  const hasPosts = answered && thread.aiAnswer.communityPosts?.length > 0;
   const timelineRef = useRef(null);
   const lastDotRef = useRef(null);
   const [lineHeight, setLineHeight] = useState(0);
@@ -613,19 +821,30 @@ function ThreadContent({
         />
 
         {/* 나의 질문 */}
-        <div className="grid gap-3 mb-5" style={{ gridTemplateColumns: "20px 1fr" }}>
+        <div
+          className="grid gap-3 mb-5"
+          style={{ gridTemplateColumns: "20px 1fr" }}
+        >
           <div className="flex justify-center pt-1 relative z-10">
-            <div
-              className="w-2.5 h-2.5 rounded-full bg-gray-900 border-2 border-white shrink-0"
-              style={{ boxShadow: "0 0 0 1.5px #111827" }}
-            />
+            <div className="w-2.5 h-2.5 rounded-full bg-gray-900 border-2 border-white shrink-0" />
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] font-bold text-gray-700 tracking-[0.04em] uppercase">나의 질문</span>
+              <span className="text-[13px] font-bold text-gray-700 tracking-[0.04em] uppercase">
+                나의 질문
+              </span>
               <span className="text-xs text-gray-400">{thread.timestamp}</span>
             </div>
-            <p className="text-sm text-gray-700 leading-relaxed">{thread.question}</p>
+            {thread.attachment && (
+              <AttachmentPreview
+                attachment={thread.attachment}
+                onOpen={onOpenAttachment}
+                className="mb-2"
+              />
+            )}
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {thread.question}
+            </p>
           </div>
         </div>
 
@@ -635,14 +854,17 @@ function ThreadContent({
             <div
               ref={thread.isLoadingAnswer ? lastDotRef : null}
               className="w-2.5 h-2.5 rounded-full bg-brand-blue border-2 border-white shrink-0"
-              style={{ boxShadow: "0 0 0 1.5px #3B5BFF" }}
             />
           </div>
           <div className={hasData || hasPosts ? "mb-5" : ""}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[13px] font-bold text-brand-blue tracking-[0.04em] uppercase">AI 답변</span>
+              <span className="text-[13px] font-bold text-brand-blue tracking-[0.04em] uppercase">
+                AI 답변
+              </span>
               {answered && (
-                <span className="text-xs text-gray-400 ml-auto">{thread.aiAnswer.body}</span>
+                <span className="text-xs text-gray-400 ml-auto">
+                  {thread.aiAnswer.body}
+                </span>
               )}
             </div>
             <AIAnswerBody
@@ -659,7 +881,10 @@ function ThreadContent({
 
         {/* 데이터 */}
         {hasData && (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
+          <div
+            className="grid gap-3"
+            style={{ gridTemplateColumns: "20px 1fr" }}
+          >
             <div className="flex justify-center pt-[37px] relative z-10">
               <div
                 ref={!hasPosts && thread.isLoadingAnswer ? lastDotRef : null}
@@ -680,7 +905,10 @@ function ThreadContent({
 
         {/* 관련 커뮤니티 글 */}
         {hasPosts && (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
+          <div
+            className="grid gap-3"
+            style={{ gridTemplateColumns: "20px 1fr" }}
+          >
             <div className="flex justify-center pt-1.5 relative z-10">
               <div
                 ref={thread.isLoadingAnswer ? lastDotRef : null}
@@ -689,15 +917,25 @@ function ThreadContent({
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-bold text-gray-900">관련 커뮤니티 글</p>
+                <p className="text-sm font-bold text-gray-900">
+                  관련 커뮤니티 글
+                </p>
                 <button className="text-xs text-gray-400 font-medium flex items-center gap-0.5">
                   전체 보기
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
-              {thread.aiAnswer.communityPosts.slice(0, 2).map(p => (
+              {thread.aiAnswer.communityPosts.slice(0, 2).map((p) => (
                 <CommunityRow key={p.id} item={p} />
               ))}
             </div>
@@ -705,7 +943,10 @@ function ThreadContent({
         )}
 
         {!thread.isLoadingAnswer && (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
+          <div
+            className="grid gap-3"
+            style={{ gridTemplateColumns: "20px 1fr" }}
+          >
             <div className="flex justify-center pt-[27px] relative z-10">
               <div
                 ref={lastDotRef}
@@ -740,6 +981,7 @@ function ThreadItem({
   onJobChange,
   onYearsChange,
   cardRef,
+  onOpenAttachment,
 }) {
   return (
     <motion.div
@@ -811,6 +1053,7 @@ function ThreadItem({
                   years={years}
                   onJobChange={onJobChange}
                   onYearsChange={onYearsChange}
+                  onOpenAttachment={onOpenAttachment}
                 />
               </div>
             </motion.div>
@@ -822,17 +1065,44 @@ function ThreadItem({
 }
 
 // ─── BottomComposer ───────────────────────────────────────────────────────────
-function BottomComposer({ onSubmit, prefillText, onClearPrefill }) {
+function BottomComposer({
+  onSubmit,
+  prefillContent,
+  onClearPrefill,
+  onOpenAttachment,
+}) {
   const [text, setText] = useState("");
+  const [attachment, setAttachment] = useState(null);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef(null);
+  const placeholderText = isFocused
+    ? "오늘의 고민은 무엇인가요?"
+    : composerPlaceholders[placeholderIndex];
 
   useEffect(() => {
-    if (prefillText) {
-      setText(prefillText);
+    if (prefillContent) {
+      if (typeof prefillContent === "string") {
+        setText(prefillContent);
+        setAttachment(null);
+      } else if (["poll", "community"].includes(prefillContent.type)) {
+        setText("");
+        setAttachment(prefillContent);
+      }
       onClearPrefill();
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
-  }, [prefillText]);
+  }, [prefillContent]);
+
+  useEffect(() => {
+    if (isFocused) return undefined;
+
+    const timer = setInterval(() => {
+      setPlaceholderIndex((i) => (i + 1) % composerPlaceholders.length);
+    }, 2600);
+
+    return () => clearInterval(timer);
+  }, [isFocused]);
 
   const adjustHeight = () => {
     const el = textareaRef.current;
@@ -847,9 +1117,10 @@ function BottomComposer({ onSubmit, prefillText, onClearPrefill }) {
   };
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
-    onSubmit(text.trim());
+    if (!text.trim() && !attachment) return;
+    onSubmit(text.trim() || attachment.title, attachment);
     setText("");
+    setAttachment(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
@@ -865,22 +1136,48 @@ function BottomComposer({ onSubmit, prefillText, onClearPrefill }) {
       className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-white border-t border-gray-100 px-4 py-2.5"
       style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
     >
-      <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder="오늘의 고민은 무엇인가요?"
-          rows={1}
-          className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none resize-none leading-5"
-          style={{ minHeight: 20, maxHeight: 100 }}
+      {["poll", "community"].includes(attachment?.type) && (
+        <AttachmentPreview
+          attachment={attachment}
+          onRemove={() => setAttachment(null)}
+          onOpen={onOpenAttachment}
+          className="mb-2"
         />
+      )}
+      <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
+        <div className="relative flex-1">
+          {!text && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={placeholderText}
+                className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -8, opacity: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+              >
+                {placeholderText}
+              </motion.div>
+            </AnimatePresence>
+          )}
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder=""
+            rows={1}
+            className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
+            style={{ minHeight: 20, maxHeight: 100 }}
+          />
+        </div>
         <button
           onClick={handleSubmit}
-          disabled={!text.trim()}
+          disabled={!text.trim() && !attachment}
           className={`shrink-0 w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
-            text.trim()
+            text.trim() || attachment
               ? "bg-brand-blue text-white"
               : "bg-gray-100 text-gray-300"
           }`}
@@ -897,7 +1194,7 @@ function BottomComposer({ onSubmit, prefillText, onClearPrefill }) {
 // ─── HomeScreen ───────────────────────────────────────────────────────────────
 let nextId = 100;
 
-export default function HomeScreen({ prefillText, onClearPrefill }) {
+export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const [threads, setThreads] = useState(() =>
     mockData.threads.map((t) => ({
       ...t,
@@ -912,6 +1209,7 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
   const [job, setJob] = useState(me.job);
   const [years, setYears] = useState(me.years);
   const [scrollSpacerHeight, setScrollSpacerHeight] = useState(0);
+  const [openAttachment, setOpenAttachment] = useState(null);
   const feedRef = useRef(null);
   const lastCardRef = useRef(null);
   const secondLastCardRef = useRef(null);
@@ -996,7 +1294,7 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
     );
   }, []);
 
-  const handleNewQuestion = useCallback(async (question) => {
+  const handleNewQuestion = useCallback(async (question, attachment = null) => {
     const id = ++nextId;
     pendingNewQuestionAlignRef.current = true;
     setScrollSpacerHeight(feedRef.current?.clientHeight ?? 0);
@@ -1010,6 +1308,7 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
           title: "...",
           category: "all",
           question,
+          attachment,
           tags: [],
           timestamp: "방금",
           isLoadingTitle: true,
@@ -1049,15 +1348,15 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
       {/* Fixed header */}
       <div className="bg-white z-20 shrink-0">
         {/* App bar */}
-        <div className="flex items-center justify-between px-5 pt-12 pb-3">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between px-5 pt-[14px] pb-[10px]">
+          <div className="flex items-center gap-[6px]">
             <h1
-              className="text-xl font-black tracking-tight text-gray-900"
+              className="text-[20px] font-extrabold text-gray-900"
               style={{ letterSpacing: "-0.03em" }}
             >
               unwritten
             </h1>
-            <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />
+            <div className="w-[5px] h-[5px] rounded-full bg-brand-blue" />
           </div>
           <button
             onClick={() => setSearching((s) => !s)}
@@ -1176,6 +1475,7 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
                 years={years}
                 onJobChange={setJob}
                 onYearsChange={setYears}
+                onOpenAttachment={setOpenAttachment}
                 cardRef={
                   isPendingAlignTarget
                     ? alignTargetCardRef
@@ -1208,8 +1508,13 @@ export default function HomeScreen({ prefillText, onClearPrefill }) {
 
       <BottomComposer
         onSubmit={handleNewQuestion}
-        prefillText={prefillText}
+        prefillContent={prefillContent}
         onClearPrefill={onClearPrefill}
+        onOpenAttachment={setOpenAttachment}
+      />
+      <AttachmentModal
+        attachment={openAttachment}
+        onClose={() => setOpenAttachment(null)}
       />
     </div>
   );
