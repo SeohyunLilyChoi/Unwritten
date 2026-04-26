@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:           #FAFBFC;
+  --ink:          #0B0E14;
+  --ink-2:        #2C3240;
+  --brand:        #3B5BFF;
+  --brand-soft:   #EEF1FF;
+  --brand-softer: #F5F8FF;
+  --muted:        #6B7280;
+  --muted-2:      #9AA1AE;
+  --line:         #E8EAEF;
+  --line-2:       #F0F1F5;
+  --card-2:       #FAFBFC;
+  --shadow-sm:    0 1px 3px rgba(11,14,20,.06);
+  --shadow-md:    0 4px 16px -4px rgba(11,14,20,.12);
+}
+
+@layer base {
+  html {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply text-gray-900;
+    background: var(--bg);
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

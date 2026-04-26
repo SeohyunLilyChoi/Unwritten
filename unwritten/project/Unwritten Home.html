@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Unwritten — Home Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg: #F5F6F8;
+    --ink: #0B0E14;
+    --ink-2: #2C3240;
+    --muted: #6B7280;
+    --muted-2: #9AA1AE;
+    --line: #E8EAEF;
+    --line-2: #EEF0F3;
+    --card: #FFFFFF;
+    --card-2: #F7F8FA;
+    --brand: #3B5BFF;
+    --brand-2: #2E49D6;
+    --brand-soft: #EEF1FF;
+    --brand-softer: #F5F7FF;
+    --good: #16A34A;
+    --bad: #EF4444;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 1px 2px rgba(11,14,20,.04), 0 1px 1px rgba(11,14,20,.03);
+    --shadow-md: 0 4px 16px rgba(11,14,20,.05), 0 1px 2px rgba(11,14,20,.04);
+    --shadow-lg: 0 20px 40px -16px rgba(11,14,20,.12), 0 2px 6px rgba(11,14,20,.05);
+  }
+  html,body{margin:0;padding:0;background:#E4E7EB;}
+  body{
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.01em;
+  }
+  *{box-sizing:border-box;}
+  button{font-family:inherit;}
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="./src/icons.jsx"></script>
+  <script type="text/babel" src="./src/shared.jsx"></script>
+  <script type="text/babel" src="./src/list_view.jsx"></script>
+  <script type="text/babel" src="./src/v1_safe.jsx"></script>
+  <script type="text/babel" src="./src/v2_timeline.jsx"></script>
+  <script type="text/babel" src="./src/content_data.jsx"></script>
+  <script type="text/babel" src="./src/content_page.jsx"></script>
+  <script type="text/babel" src="./src/community_page.jsx"></script>
+  <script type="text/babel" src="./src/tweaks.jsx"></script>
+  <script type="text/babel" src="./src/app.jsx"></script>
+</body>
+</html>
