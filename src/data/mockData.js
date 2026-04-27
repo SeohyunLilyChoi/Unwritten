@@ -59,11 +59,8 @@ export const mockData = {
         headline: '충분한 이유가 있다면 괜찮아요.',
         highlight: '미리 양해를 구하면 대부분 이해해줘요.',
         body: '콘텐츠 6건 · 커뮤니티 178건을 분석했어요.',
-        takeaways: [
-          '최소 2~3일 전에 팀장에게 먼저 말하는 게 중요해요',
-          '개인 약속보다 구체적인 이유를 간단히 설명하면 더 자연스러워요',
-          '1차 회식엔 가능하면 잠깐이라도 참석하는 게 좋아요',
-        ],
+        dataSummary: '저연차도 회식 불참을 이해받는 비율이 높아요.',
+        communitySummary: '미리 짧게 양해를 구하면 무난했다는 경험이 많아요.',
         dataCard: {
           title: '회식 불참 시 팀 반응',
           matrix: {
@@ -96,11 +93,8 @@ export const mockData = {
         headline: '10분이면 충분해요.',
         highlight: '대부분의 팀에서 정시 출근이 기본 기준이에요.',
         body: '콘텐츠 12건 · 커뮤니티 203건을 분석했어요.',
-        takeaways: [
-          '10분 전 도착이 가장 일반적인 신입 출근 기준이에요',
-          '더 일찍 오는 것보다 일관된 시간이 더 중요해요',
-          '팀장님의 패턴을 2주간 관찰해보는 것도 도움이 돼요',
-        ],
+        dataSummary: '1–3년차는 10분 전후 도착을 충분하다고 보는 응답이 가장 많아요.',
+        communitySummary: '너무 일찍 오기보다 꾸준한 출근 패턴이 더 중요하다는 의견이 많아요.',
         dataCard: {
           title: '신입의 출근 시간 여유',
           matrix: {
@@ -133,11 +127,8 @@ export const mockData = {
         headline: '충분히 괜찮아요!',
         highlight: '도시락 문화가 자리잡은 팀이 점점 늘고 있어요.',
         body: '콘텐츠 8건 · 커뮤니티 124건을 분석했어요.',
-        takeaways: [
-          '팀 분위기에 따라 다르지만, 가볍게 먼저 말해두는 게 안전해요',
-          '도시락 문화가 자리잡은 팀이 많아 거절당할 확률은 낮아요',
-          '주 1~2회 함께, 나머지는 혼자로 절충하는 것도 방법이에요',
-        ],
+        dataSummary: '저연차와 개발·디자인 직군에서 혼밥 비율이 비교적 높아요.',
+        communitySummary: '도시락이나 개인 일정처럼 자연스럽게 말하면 받아들여지는 편이에요.',
         dataCard: {
           title: '점심 혼밥 실천 비율',
           matrix: {
@@ -164,7 +155,7 @@ export const mockData = {
             headline: '가볍게 먼저 운을 띄워보세요.',
             highlight: '"오늘은 간단히 먹을게요" 정도면 충분해요.',
             body: '커뮤니티 89건을 분석했어요.',
-            takeaways: [],
+            communitySummary: '길게 설명하기보다 오늘만 간단히 먹겠다는 말이 가장 부담이 적어요.',
             dataCard: null,
             communityPosts: [],
           },
@@ -189,11 +180,8 @@ export const MOCK_NEW_ANSWER = {
   headline: '충분히 이야기해볼 수 있어요.',
   highlight: '비슷한 고민을 한 분들이 생각보다 많아요.',
   body: '콘텐츠 10건 · 커뮤니티 156건을 분석했어요.',
-  takeaways: [
-    '혼자 끌어안기보다 명확히 표현하는 게 장기적으로 더 나아요',
-    '비슷한 상황을 먼저 경험한 선배들의 방식을 참고해보세요',
-    '작은 시도부터 시작하면 생각보다 쉽게 해결되는 경우가 많아요',
-  ],
+  dataSummary: '비슷한 고민을 해봤다는 응답이 절반을 넘어요.',
+  communitySummary: '먼저 겪은 사람들의 사례를 참고했다는 반응이 많아요.',
   dataCard: {
     title: '같은 고민을 해본 직장인 비율',
     matrix: {
@@ -216,7 +204,7 @@ export const MOCK_FOLLOWUP_ANSWER = {
   headline: '구체적으로 접근해보세요.',
   highlight: '작은 한 마디가 분위기를 바꿔요.',
   body: '커뮤니티 94건을 분석했어요.',
-  takeaways: [],
+  communitySummary: '상황을 키우기보다 짧고 구체적인 한 문장으로 말해보는 방식을 많이 추천해요.',
   dataCard: null,
   communityPosts: [],
 }

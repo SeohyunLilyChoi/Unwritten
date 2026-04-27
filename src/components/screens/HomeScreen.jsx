@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   mockData,
   me,
-  filterOptions,
   categoryChips,
   computeDataView,
   MOCK_NEW_TITLES,
@@ -30,154 +29,108 @@ function Skeleton({ className = "" }) {
 }
 
 // ─── StatBars ─────────────────────────────────────────────────────────────────
-function StatBars({ bars }) {
+function StatBars({ bars, mode = "profile" }) {
+  const maxValue = Math.max(...bars.map((b) => b.value));
+  const isOverall = mode === "overall";
+
   return (
     <div className="flex flex-col gap-2.5">
-      {bars.map((b, i) => (
-        <div
-          key={i}
-          className="grid items-center gap-3"
-          style={{ gridTemplateColumns: "64px 1fr 36px" }}
-        >
-          <span
-            className={`text-sm ${b.highlight ? "font-bold text-gray-800" : "font-medium text-gray-500"}`}
+      {bars.map((b, i) => {
+        const isMax = b.value === maxValue;
+        const active = isOverall ? isMax : b.highlight;
+        const barClass = isOverall
+          ? isMax
+            ? "bg-[#9DB2FF]"
+            : "bg-[#DCE3FF]"
+          : b.highlight
+            ? "bg-brand-blue"
+            : "bg-gray-300";
+
+        return (
+          <div
+            key={i}
+            className="grid items-center gap-3"
+            style={{ gridTemplateColumns: "64px 1fr 36px" }}
           >
-            {b.label}
-          </span>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <motion.div
-              className={`h-full rounded-full ${b.highlight ? "bg-brand-blue" : "bg-gray-300"}`}
-              initial={{ width: 0 }}
-              animate={{ width: `${b.value}%` }}
-              transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
-            />
+            <span
+              className={`text-sm ${active ? "font-bold text-gray-800" : "font-medium text-gray-500"}`}
+            >
+              {b.label}
+            </span>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${barClass}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${b.value}%` }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+              />
+            </div>
+            <span
+              className={`text-sm text-right font-semibold ${active ? "text-gray-800" : "text-gray-400"}`}
+            >
+              {b.value}%
+            </span>
           </div>
-          <span
-            className={`text-sm text-right font-semibold ${b.highlight ? "text-gray-800" : "text-gray-400"}`}
-          >
-            {b.value}%
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-// ─── DataCard ─────────────────────────────────────────────────────────────────
 function DataCard({ dataCard, job, years, onJobChange, onYearsChange }) {
   if (!dataCard) return null;
   const view = computeDataView(dataCard.matrix, job, years);
   if (!view) return null;
   const isMyProfile = job === me.job && years === me.years;
+  const handleToggleProfile = (event) => {
+    event.stopPropagation();
+    if (isMyProfile) {
+      onJobChange("all");
+      onYearsChange("all");
+      return;
+    }
+
+    onJobChange(me.job);
+    onYearsChange(me.years);
+  };
 
   return (
-    <div
-      className="mt-5 rounded-[14px] p-4"
-      style={{ background: "#F5F8FF", border: "1px solid #E3E8FF" }}
-    >
-      {/* Title + 내 프로필 버튼 */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
+    <div className="mt-5">
+      {/* Title + profile filters */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="min-w-0">
           <p className="text-sm font-bold text-gray-900">{dataCard.title}</p>
           <p className="text-xs text-gray-400 mt-0.5">
             {view.n.toLocaleString()}명 응답
           </p>
         </div>
-        <button
-          onClick={() => {
-            onJobChange(me.job);
-            onYearsChange(me.years);
-          }}
-          className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-[11px] font-semibold border transition-colors ${
-            isMyProfile
-              ? "bg-white text-brand-blue border-brand-blue"
-              : "bg-white text-gray-500 border-gray-200"
-          }`}
+      <button
+        type="button"
+        onClick={handleToggleProfile}
+          aria-pressed={isMyProfile}
+          className="shrink-0 h-8 flex items-center gap-2 text-xs font-semibold text-gray-500"
         >
+          <span>내 직무/연차</span>
           <span
-            className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center ${
-              isMyProfile
-                ? "bg-brand-blue border-brand-blue text-white"
-                : "bg-white border-gray-300"
+            className={`relative h-5 w-9 rounded-full transition-colors ${
+              isMyProfile ? "bg-brand-blue" : "bg-gray-200"
             }`}
           >
-            {isMyProfile && (
-              <svg
-                className="w-2.5 h-2.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12l4 4L19 6" />
-              </svg>
-            )}
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-[left] ${
+                isMyProfile ? "left-[18px]" : "left-0.5"
+              }`}
+            />
           </span>
-          내 프로필
         </button>
       </div>
 
-      {/* Job filter */}
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span
-          className="text-[11px] font-bold text-gray-400 uppercase tracking-wide shrink-0"
-          style={{ width: 28 }}
-        >
-          직군
-        </span>
-        <div
-          className="flex gap-1.5 overflow-x-auto"
-          style={{ scrollbarWidth: "none" }}
-        >
-          {filterOptions.jobs.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => onJobChange(o.id)}
-              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors duration-150 ${
-                job === o.id
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-700 border-gray-200"
-              }`}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <StatBars bars={view.bars} mode={isMyProfile ? "profile" : "overall"} />
 
-      {/* Year filter */}
-      <div className="flex items-center gap-1.5 mb-3">
-        <span
-          className="text-[11px] font-bold text-gray-400 uppercase tracking-wide shrink-0"
-          style={{ width: 28 }}
-        >
-          연차
-        </span>
-        <div
-          className="flex gap-1.5 overflow-x-auto"
-          style={{ scrollbarWidth: "none" }}
-        >
-          {filterOptions.years.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => onYearsChange(o.id)}
-              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors duration-150 ${
-                years === o.id
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-700 border-gray-200"
-              }`}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <StatBars bars={view.bars} />
-
-      <button className="mt-3 w-full bg-white rounded-[10px] py-2.5 text-sm font-semibold text-brand-blue flex items-center justify-center gap-1">
+      <button
+        onClick={(event) => event.stopPropagation()}
+        className="mt-4 w-full bg-[#F3F5FB] border border-[#E1E6F2] rounded-[10px] py-2.5 text-sm font-semibold text-brand-blue flex items-center justify-center gap-1"
+      >
         관련 데이터 더보기
         <svg
           className="w-3.5 h-3.5"
@@ -200,7 +153,8 @@ function CommunityRow({ item }) {
   return (
     <button
       type="button"
-      className="w-full text-left bg-white border border-gray-100 rounded-xl px-3 py-3 mb-2 last:mb-0 shadow-sm cursor-pointer transition-colors hover:border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+      onClick={(event) => event.stopPropagation()}
+      className="w-full text-left bg-white border border-[#E3E8F2] rounded-xl px-3.5 py-3.5 mb-2 last:mb-0 shadow-sm cursor-pointer transition-colors hover:border-[#D5DCEB] hover:bg-[#F8FAFD] active:bg-[#F1F4FA]"
     >
       <p className="text-sm font-bold text-gray-900 mb-1 leading-snug">
         {item.title}
@@ -210,35 +164,36 @@ function CommunityRow({ item }) {
       </p>
       <div className="flex items-center gap-2 mt-1.5 text-[11.5px] text-gray-400">
         <span>{item.role}</span>
-        <span className="w-0.5 h-0.5 bg-gray-300 rounded-full" />
-        <span className="flex items-center gap-0.5">
-          <svg
-            className="w-3 h-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />
-          </svg>
-          {item.likes}
-        </span>
-        <span className="flex items-center gap-0.5">
-          <svg
-            className="w-3 h-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" />
-          </svg>
-          {item.comments}
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="flex items-center gap-0.5">
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />
+            </svg>
+            {item.likes}
+          </span>
+          <span className="flex items-center gap-0.5">
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" />
+            </svg>
+            {item.comments}
+          </span>
+        </div>
       </div>
     </button>
   );
@@ -294,13 +249,16 @@ function FeedbackStrip({
 
   return (
     <>
-      <div className="py-3.5 border-t border-gray-100">
+      <div
+        className="py-3.5 border-t border-gray-100"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-400">이 답변이 도움됐나요?</span>
           <div className="flex gap-2">
             <button
               onClick={() => onFeedback("up")}
-              className="w-[34px] h-[34px] rounded-[10px] border border-gray-200 bg-white text-gray-400 flex items-center justify-center hover:border-brand-blue hover:text-brand-blue transition-colors"
+              className="w-[34px] h-[34px] rounded-[10px] border border-[#E1E6F2] bg-[#F3F5FB] text-gray-500 flex items-center justify-center hover:border-brand-blue hover:text-brand-blue transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2l-.01-.01L23 10z" />
@@ -310,8 +268,8 @@ function FeedbackStrip({
               onClick={() => setShowReasonSheet((open) => !open)}
               className={`w-[34px] h-[34px] rounded-[10px] border flex items-center justify-center transition-colors ${
                 showReasonSheet
-                  ? "border-red-300 bg-red-50 text-red-400"
-                  : "border-gray-200 bg-white text-gray-400 hover:border-gray-200 hover:text-gray-400"
+                  ? "border-brand-blue bg-[#DFF1FF] text-brand-blue"
+                  : "border-[#E1E6F2] bg-[#F3F5FB] text-gray-500 hover:border-[#E1E6F2] hover:text-gray-500"
               }`}
             >
               <svg
@@ -328,8 +286,8 @@ function FeedbackStrip({
               disabled={isLoadingAnswer || isLastFollowUpLoading}
               className={`w-[34px] h-[34px] rounded-[10px] border flex items-center justify-center disabled:opacity-40 transition-colors ${
                 followUpOpen
-                  ? "border-brand-blue bg-brand-blue-light text-brand-blue"
-                  : "border-gray-200 bg-white text-gray-400 hover:border-gray-200 hover:text-gray-400"
+                  ? "border-brand-blue bg-[#DFF1FF] text-brand-blue"
+                  : "border-[#E1E6F2] bg-[#F3F5FB] text-gray-500 hover:border-[#E1E6F2] hover:text-gray-500"
               }`}
             >
               <svg
@@ -406,13 +364,17 @@ function FeedbackStrip({
 
 // ─── AttachmentPreview ────────────────────────────────────────────────────────
 function AttachmentPreview({ attachment, onRemove, onOpen, className = "" }) {
-  if (!attachment || !["poll", "community"].includes(attachment.type)) return null;
+  if (!attachment || !["poll", "community"].includes(attachment.type))
+    return null;
   const label = attachment.type === "poll" ? "투표" : "논의";
 
   return (
     <button
       type="button"
-      onClick={() => onOpen?.(attachment)}
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpen?.(attachment);
+      }}
       className={`inline-flex max-w-full text-left rounded-xl border border-brand-blue/20 bg-brand-blue-light px-3 py-2 items-start gap-2 cursor-pointer active:bg-[#E3E8FF] ${className}`}
     >
       <div className="shrink-0 mt-0.5 rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold text-brand-blue">
@@ -541,10 +503,7 @@ function AttachmentModal({ attachment, onClose }) {
           ) : (
             <div>
               {attachment.summary && (
-                <p
-                  className="inline text-[16px] font-bold leading-snug text-gray-900"
-                  style={{ background: "rgba(160, 237, 224, 0.3)" }}
-                >
+                <p className="text-[16px] font-bold leading-snug text-gray-900">
                   {attachment.summary}
                 </p>
               )}
@@ -676,6 +635,38 @@ function FollowUpSection({ threadId, followUps, onSend, isLoadingAnswer }) {
 }
 
 // ─── AIAnswerBody ─────────────────────────────────────────────────────────────
+function EvidenceIcon({ type }) {
+  const path =
+    type === "content"
+      ? "M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"
+      : "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z";
+
+  return (
+    <svg
+      className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d={path}
+      />
+      {type === "content" && (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M13 4v6h6"
+        />
+      )}
+    </svg>
+  );
+}
+
 function AIAnswerBody({
   aiAnswer,
   isLoading,
@@ -700,27 +691,29 @@ function AIAnswerBody({
 
   return (
     <div>
-      <p
-        className="inline text-[17px] font-bold text-gray-900 leading-snug"
-        style={{ background: "rgba(160, 237, 224, 0.3)" }}
-      >
+      <p className="text-[17px] font-bold text-gray-900 leading-snug">
         {aiAnswer.headline}
       </p>
-      <p className="mt-2 text-sm text-gray-600 mb-1.5">
-        {aiAnswer.highlight}
-      </p>
+      <p className="mt-1 text-[15px] font-medium text-gray-900 mb-1.5">{aiAnswer.highlight}</p>
 
-      {aiAnswer.takeaways && aiAnswer.takeaways.length > 0 && (
-        <ul className="mt-4 flex flex-col gap-2.5">
-          {aiAnswer.takeaways.map((t, i) => (
-            <li key={i} className="flex gap-2.5 items-start">
-              <span className="shrink-0 w-[18px] h-[18px] text-brand-blue text-[11px] font-bold flex items-center justify-center mt-0.5">
-                {i + 1}
-              </span>
-              <span className="text-sm text-gray-600 leading-relaxed">{t}</span>
-            </li>
-          ))}
-        </ul>
+      {(aiAnswer.dataSummary || aiAnswer.communitySummary || aiAnswer.evidenceSummary) && (
+        <div className="mt-4 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+          {aiAnswer.dataSummary && (
+            <p className="flex items-start gap-2.5">
+              <EvidenceIcon type="content" />
+              <span className="break-keep">{aiAnswer.dataSummary}</span>
+            </p>
+          )}
+          {aiAnswer.communitySummary && (
+            <p className="flex items-start gap-2.5">
+              <EvidenceIcon type="community" />
+              <span className="break-keep">{aiAnswer.communitySummary}</span>
+            </p>
+          )}
+          {!aiAnswer.dataSummary && !aiAnswer.communitySummary && aiAnswer.evidenceSummary && (
+            <p>{aiAnswer.evidenceSummary}</p>
+          )}
+        </div>
       )}
 
       {showDataCard && (
@@ -775,10 +768,12 @@ function ThreadContent({
   onJobChange,
   onYearsChange,
   onOpenAttachment,
+  previewMode = false,
 }) {
   const answered = !thread.isLoadingAnswer && thread.aiAnswer;
-  const hasData = answered && thread.aiAnswer.dataCard;
-  const hasPosts = answered && thread.aiAnswer.communityPosts?.length > 0;
+  const hasData = !previewMode && answered && thread.aiAnswer.dataCard;
+  const hasPosts =
+    !previewMode && answered && thread.aiAnswer.communityPosts?.length > 0;
   const timelineRef = useRef(null);
   const lastDotRef = useRef(null);
   const [lineHeight, setLineHeight] = useState(0);
@@ -808,12 +803,15 @@ function ThreadContent({
       observer.disconnect();
       window.removeEventListener("resize", updateLineHeight);
     };
-  }, [thread.isLoadingAnswer, hasData, hasPosts]);
+  }, [thread.isLoadingAnswer, hasData, hasPosts, previewMode]);
 
   return (
     <div>
       {/* Timeline */}
-      <div ref={timelineRef} className="px-[18px] pt-4 pb-2 relative">
+      <div
+        ref={timelineRef}
+        className={`px-[18px] pt-4 relative ${previewMode ? "pb-5" : "pb-2"}`}
+      >
         {/* Connecting vertical line — behind all dots */}
         <div
           className="absolute bg-gray-200"
@@ -822,7 +820,7 @@ function ThreadContent({
 
         {/* 나의 질문 */}
         <div
-          className="grid gap-3 mb-5"
+          className="grid gap-3 mb-7"
           style={{ gridTemplateColumns: "20px 1fr" }}
         >
           <div className="flex justify-center pt-1 relative z-10">
@@ -852,12 +850,12 @@ function ThreadContent({
         <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
           <div className="flex justify-center pt-1 relative z-10">
             <div
-              ref={thread.isLoadingAnswer ? lastDotRef : null}
+              ref={previewMode || thread.isLoadingAnswer ? lastDotRef : null}
               className="w-2.5 h-2.5 rounded-full bg-brand-blue border-2 border-white shrink-0"
             />
           </div>
-          <div className={hasData || hasPosts ? "mb-5" : ""}>
-            <div className="flex items-center gap-2 mb-2">
+          <div className={hasData || hasPosts ? "mb-7" : ""}>
+            <div className="flex items-center gap-2 mb-3">
               <span className="text-[13px] font-bold text-brand-blue tracking-[0.04em] uppercase">
                 AI 답변
               </span>
@@ -885,13 +883,13 @@ function ThreadContent({
             className="grid gap-3"
             style={{ gridTemplateColumns: "20px 1fr" }}
           >
-            <div className="flex justify-center pt-[37px] relative z-10">
+            <div className="flex justify-center pt-[26px] relative z-10">
               <div
                 ref={!hasPosts && thread.isLoadingAnswer ? lastDotRef : null}
                 className="w-2 h-2 rounded-full bg-gray-300 border-2 border-white shrink-0"
               />
             </div>
-            <div className={hasPosts ? "mb-5" : ""}>
+            <div className={hasPosts ? "mb-7" : ""}>
               <DataCard
                 dataCard={thread.aiAnswer.dataCard}
                 job={job}
@@ -915,34 +913,37 @@ function ThreadContent({
                 className="w-2 h-2 rounded-full bg-gray-300 border-2 border-white shrink-0"
               />
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
+            <div className={!previewMode ? "mb-3" : ""}>
+              <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-bold text-gray-900">
                   관련 커뮤니티 글
                 </p>
-                <button className="text-xs text-gray-400 font-medium flex items-center gap-0.5">
-                  전체 보기
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
               </div>
               {thread.aiAnswer.communityPosts.slice(0, 2).map((p) => (
                 <CommunityRow key={p.id} item={p} />
               ))}
+              <button
+                onClick={(event) => event.stopPropagation()}
+                className="mt-4 w-full bg-[#F3F5FB] border border-[#E1E6F2] rounded-[10px] py-2.5 text-sm font-semibold text-brand-blue flex items-center justify-center gap-1"
+              >
+                관련 커뮤니티 글 더보기
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
         )}
 
-        {!thread.isLoadingAnswer && (
+        {!previewMode && !thread.isLoadingAnswer && (
           <div
             className="grid gap-3"
             style={{ gridTemplateColumns: "20px 1fr" }}
@@ -975,7 +976,6 @@ function ThreadItem({
   onToggle,
   onFeedback,
   onFollowUp,
-  dimmed,
   job,
   years,
   onJobChange,
@@ -987,20 +987,24 @@ function ThreadItem({
     <motion.div
       ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: dimmed ? 0.25 : 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="mb-3"
     >
       <div
-        className="rounded-2xl border border-gray-100 overflow-hidden transition-colors duration-200"
+        onClick={onToggle}
+        className="rounded-2xl border border-gray-100 overflow-hidden transition-colors duration-200 cursor-pointer"
         style={{
-          background: isOpen ? "#F5F7FF" : "#FFFFFF",
+          background: "#FFFFFF",
           boxShadow: "0 1px 3px rgba(11,14,20,.06)",
         }}
       >
         {/* Card header — toggle */}
         <button
-          onClick={onToggle}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggle();
+          }}
           className="w-full text-left px-[18px] py-4 flex items-center justify-between gap-3"
           style={{ minHeight: 52 }}
         >
@@ -1008,7 +1012,7 @@ function ThreadItem({
             {thread.isLoadingTitle ? (
               <Skeleton className="h-5 w-40" />
             ) : (
-              <p className="text-[15.5px] font-bold text-gray-900 leading-snug truncate">
+              <p className="text-[17px] font-bold text-gray-900 leading-snug truncate">
                 {thread.title}
               </p>
             )}
@@ -1034,31 +1038,19 @@ function ThreadItem({
           </motion.div>
         </button>
 
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              key="body"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              style={{ overflow: "hidden" }}
-            >
-              <div className="border-t border-gray-100">
-                <ThreadContent
-                  thread={thread}
-                  onFeedback={onFeedback}
-                  onFollowUp={onFollowUp}
-                  job={job}
-                  years={years}
-                  onJobChange={onJobChange}
-                  onYearsChange={onYearsChange}
-                  onOpenAttachment={onOpenAttachment}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="border-t border-gray-100">
+          <ThreadContent
+            thread={thread}
+            onFeedback={onFeedback}
+            onFollowUp={onFollowUp}
+            job={job}
+            years={years}
+            onJobChange={onJobChange}
+            onYearsChange={onYearsChange}
+            onOpenAttachment={onOpenAttachment}
+            previewMode={!isOpen}
+          />
+        </div>
       </div>
     </motion.div>
   );
@@ -1216,6 +1208,12 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const alignTargetCardRef = useRef(null);
   const pendingAlignTargetIdRef = useRef(null);
   const pendingNewQuestionAlignRef = useRef(false);
+  const pendingCategoryBottomScrollRef = useRef(false);
+  const pendingAllAlignRef = useRef(false);
+  const visibleThreads =
+    selectedCategory === "all"
+      ? threads
+      : threads.filter((thread) => thread.category === selectedCategory);
 
   const alignSecondLastCardToFeedTop = useCallback(() => {
     const feed = feedRef.current;
@@ -1225,9 +1223,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
         : secondLastCardRef.current;
     if (!feed || !card) return;
 
-    const feedTop = feed.getBoundingClientRect().top;
-    const cardBottom = card.getBoundingClientRect().bottom;
-    feed.scrollTop += cardBottom - feedTop;
+    feed.scrollTop = card.offsetTop + card.offsetHeight;
   }, []);
 
   useEffect(() => {
@@ -1257,6 +1253,33 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const handleToggle = useCallback((id) => {
     setOpenId((prev) => (prev === id ? null : id));
   }, []);
+
+  useLayoutEffect(() => {
+    if (!pendingCategoryBottomScrollRef.current) return;
+
+    if (feedRef.current) {
+      feedRef.current.scrollTop = feedRef.current.scrollHeight;
+    }
+    pendingCategoryBottomScrollRef.current = false;
+  }, [selectedCategory, visibleThreads.length, openId]);
+
+  useLayoutEffect(() => {
+    if (!pendingAllAlignRef.current) return undefined;
+
+    alignSecondLastCardToFeedTop();
+    pendingAllAlignRef.current = false;
+
+    return undefined;
+  }, [selectedCategory, openId, visibleThreads.length, alignSecondLastCardToFeedTop]);
+
+  const handleCategorySelect = useCallback((categoryId) => {
+    pendingAllAlignRef.current = categoryId === "all";
+    pendingCategoryBottomScrollRef.current = categoryId !== "all";
+    setOpenId(
+      categoryId === "all" ? (threads[threads.length - 1]?.id ?? null) : null,
+    );
+    setSelectedCategory(categoryId);
+  }, [threads]);
 
   const handleFeedback = useCallback((threadId, type) => {
     setThreads((prev) =>
@@ -1426,7 +1449,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
           {categoryChips.map((c) => (
             <button
               key={c.id}
-              onClick={() => setSelectedCategory(c.id)}
+              onClick={() => handleCategorySelect(c.id)}
               className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
                 selectedCategory === c.id
                   ? "bg-brand-blue text-white border-brand-blue"
@@ -1439,26 +1462,18 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
           ))}
         </div>
 
-        {selectedCategory !== "all" && (
-          <div className="px-5 py-2 text-sm text-gray-500 border-b border-gray-50">
-            <strong className="text-gray-700">
-              {categoryChips.find((c) => c.id === selectedCategory)?.label}
-            </strong>{" "}
-            주제로 필터링됨
-          </div>
-        )}
       </div>
 
       {/* Thread feed — independent scroll */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-40">
+      <div
+        ref={feedRef}
+        className="flex-1 overflow-y-auto px-4 pt-4 pb-28"
+        style={{ background: "#F5F7FF" }}
+      >
         <AnimatePresence mode="popLayout" initial={false}>
-          {threads.map((thread, idx) => {
-            const dimmed =
-              selectedCategory !== "all" &&
-              thread.category !== selectedCategory &&
-              thread.category !== undefined;
-            const isLast = idx === threads.length - 1;
-            const isSecondLast = idx === threads.length - 2;
+          {visibleThreads.map((thread, idx) => {
+            const isLast = idx === visibleThreads.length - 1;
+            const isSecondLast = idx === visibleThreads.length - 2;
             const isPendingAlignTarget =
               pendingNewQuestionAlignRef.current &&
               thread.id === pendingAlignTargetIdRef.current;
@@ -1470,7 +1485,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                 onToggle={() => handleToggle(thread.id)}
                 onFeedback={(type) => handleFeedback(thread.id, type)}
                 onFollowUp={handleFollowUp}
-                dimmed={dimmed}
                 job={job}
                 years={years}
                 onJobChange={setJob}
@@ -1490,11 +1504,11 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
           })}
         </AnimatePresence>
 
-        {threads.length === 0 && (
+        {visibleThreads.length === 0 && (
           <div className="flex flex-col items-center justify-center pt-24 text-center px-8">
             <p className="text-3xl mb-3">✏️</p>
             <p className="text-base font-bold text-gray-800 mb-1.5">
-              첫 질문을 해보세요
+              해당 주제의 질문이 없어요
             </p>
             <p className="text-sm text-gray-400 leading-relaxed">
               직장생활의 고민을 AI에게 물어보세요
