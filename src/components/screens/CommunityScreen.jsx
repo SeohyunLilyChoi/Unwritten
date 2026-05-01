@@ -508,7 +508,6 @@ export default function CommunityScreen({ onAskAI }) {
             width: 34,
             height: 34,
             borderRadius: 10,
-            border: "1px solid var(--line)",
             background: "#fff",
             display: "inline-flex",
             alignItems: "center",

@@ -1,6 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkle, Arrow, Clock, Chevron } from "../common/Icons";
 import { me } from "../../data/mockData";
+import curiousImg from "../images/curious.png";
+import voteIconImg from "../images/vote_icon.png";
+import attendanceImg from "../images/attendance.png";
+import tipsImg from "../images/tips.png";
+import contestImg from "../images/contest.png";
+import happyImg from "../images/happy.png";
+import thumbsUpImg from "../images/thumbs_up.png";
 import {
   CONTENT_TYPES,
   CONTENT_POLLS,
@@ -11,10 +18,29 @@ import {
 } from "../../data/contentData";
 
 // ─── Header ───────────────────────────────────────────────────────────────────
-function Header() {
+function Header({ points }) {
+  const [displayPoints, setDisplayPoints] = useState(0);
+  const displayRef = useRef(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const end = points;
+    timerRef.current = setInterval(() => {
+      displayRef.current += 1;
+      setDisplayPoints(displayRef.current);
+      if (displayRef.current >= end) clearInterval(timerRef.current);
+    }, 28);
+    return () => clearInterval(timerRef.current);
+  }, [points]);
+
   return (
     <header
       style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: "#fff",
         padding: "14px 20px 10px",
         display: "flex",
         alignItems: "center",
@@ -41,34 +67,49 @@ function Header() {
           }}
         />
       </div>
-      <button
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 10,
-          border: "1px solid var(--line)",
-          background: "#fff",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--ink-2)",
-          cursor: "pointer",
-        }}
-      >
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <button
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            height: 30, padding: "0 10px",
+            background: "#EEF2FF", borderRadius: 99,
+            border: "none", cursor: "pointer",
+          }}
         >
-          <circle cx="11" cy="11" r="7" />
-          <path d="M20 20l-3.5-3.5" />
-        </svg>
-      </button>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="var(--brand)" />
+            <text x="12" y="16.5" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff" fontFamily="inherit">P</text>
+          </svg>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)" }}>{displayPoints} P</span>
+        </button>
+        <button
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 10,
+            background: "#fff",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--ink-2)",
+            cursor: "pointer",
+          }}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+        </button>
+      </div>
     </header>
   );
 }
@@ -665,93 +706,208 @@ function ContestCard({ contest }) {
   );
 }
 
-// ─── Word card ────────────────────────────────────────────────────────────────
-function WordCard({ word, onAskAI }) {
+// ─── Point toast ─────────────────────────────────────────────────────────────
+function PointToast({ amount, visible }) {
   return (
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid var(--line-2)",
-        borderRadius: 16,
-        padding: "16px 16px 14px",
-      }}
-    >
-      <div
-        style={{
+    <div style={{
+      position: "fixed",
+      top: 72,
+      left: "50%",
+      transform: `translateX(-50%) translateY(${visible ? 0 : -8}px)`,
+      opacity: visible ? 1 : 0,
+      transition: "opacity .25s ease, transform .25s ease",
+      zIndex: 200,
+      pointerEvents: "none",
+      background: "rgba(17,17,17,.88)",
+      color: "#fff",
+      fontSize: 13,
+      fontWeight: 700,
+      padding: "9px 18px",
+      borderRadius: 99,
+      whiteSpace: "nowrap",
+      backdropFilter: "blur(6px)",
+    }}>
+      +{amount}포인트를 획득했어요! 🎉
+    </div>
+  );
+}
+
+// ─── Word quiz card ───────────────────────────────────────────────────────────
+function WordCard({ word, onAskAI, onNext, onEarnPoint }) {
+  const [selected, setSelected] = useState(null);
+  const [flipped, setFlipped] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const answered = selected !== null;
+  const isCorrect = selected === word.answer;
+
+  const handleSelect = (i) => {
+    if (answered) return;
+    setSelected(i);
+  };
+
+  const optionStyle = (i) => {
+    const base = {
+      width: "100%", textAlign: "left", cursor: answered ? "default" : "pointer",
+      border: "1px solid var(--line)", borderRadius: 10,
+      padding: "10px 12px", fontSize: 14, fontWeight: 500,
+      background: "#fff", color: "var(--ink-2)",
+      display: "flex", alignItems: "center", gap: 10,
+    };
+    if (!answered) return base;
+    if (i === word.answer) return { ...base, background: "#E7F6EC", border: "1px solid #16A34A", color: "#15803D", fontWeight: 600 };
+    if (i === selected)   return { ...base, background: "#FFF0F0", border: "1px solid #EF4444", color: "#DC2626" };
+    return { ...base, opacity: 0.4 };
+  };
+
+  return (
+    <div style={{ perspective: "1000px" }}>
+      <div style={{
+        position: "relative",
+        transformStyle: "preserve-3d",
+        transition: "transform .65s cubic-bezier(.4,0,.2,1)",
+        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+      }}>
+
+        {/* ── FRONT: 퀴즈 ── */}
+        <div style={{
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          background: "#fff",
+          border: "1px solid var(--line-2)",
+          borderRadius: 16,
+          overflow: "hidden",
+        }}>
+          <div style={{ padding: "16px 16px 14px", borderBottom: "1px solid var(--line-2)", textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-.025em", color: "var(--ink)" }}>
+              "{word.word}"
+            </div>
+          </div>
+          <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+            {word.options.map((opt, i) => (
+              <button key={i} onClick={() => handleSelect(i)} style={optionStyle(i)}>
+                <span style={{
+                  flexShrink: 0, width: 22, height: 22, borderRadius: 99,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 11, fontWeight: 800,
+                  background: answered && i === word.answer ? "#16A34A"
+                    : answered && i === selected ? "#EF4444"
+                    : "var(--line)",
+                  color: answered && (i === word.answer || i === selected) ? "#fff" : "var(--muted)",
+                }}>
+                  {answered && i === word.answer ? "✓" : answered && i === selected ? "✗" : String.fromCharCode(65 + i)}
+                </span>
+                {opt}
+              </button>
+            ))}
+            {answered && (
+              <button
+                onClick={() => { onEarnPoint?.(10); setTimeout(() => setFlipped(true), 900); }}
+                style={{
+                  alignSelf: "center",
+                  marginTop: 4,
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "7px 16px",
+                  background: "var(--brand)",
+                  border: "none", borderRadius: 99,
+                  fontSize: 13, fontWeight: 700, color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                포인트 받고 설명 보기
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── BACK: 단어장 ── */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          transform: "rotateY(180deg)",
+          background: "#fff",
+          border: "1px solid var(--line-2)",
+          borderRadius: 16,
+          overflow: "hidden",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           justifyContent: "space-between",
-          marginBottom: 6,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: "var(--muted)",
-            background: "#fff",
-            border: "1px solid var(--line-2)",
-            padding: "2px 8px",
-            borderRadius: 99,
-          }}
-        >
-          {word.tag}
-        </span>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 8,
-          margin: "10px 0",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 28,
-            fontWeight: 800,
-            letterSpacing: "-.03em",
-            color: "var(--ink)",
-          }}
-        >
-          {word.word}
+          padding: "20px 16px 16px",
+        }}>
+          {/* 스크랩 버튼 */}
+          <div style={{ position: "absolute", top: 14, right: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            {saved && (
+              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--muted)" }}>저장 완료</span>
+            )}
+            <button
+              onClick={() => setSaved(v => !v)}
+              style={{ background: "none", border: "none", padding: 2, cursor: "pointer", lineHeight: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={saved ? "#111" : "none"} stroke={saved ? "#111" : "var(--muted)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+          </div>
+          <div style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            gap: 10,
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-.03em", color: "var(--ink)" }}>
+              {word.word}
+            </div>
+            <div style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.65, whiteSpace: "pre-line" }}>
+              {word.explanation.replace(/\. /g, '.\n')}
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, textAlign: "left" }}>
+              <div style={{
+                flexShrink: 0,
+                fontSize: 11, fontWeight: 700, color: "var(--muted)",
+                letterSpacing: ".04em",
+                background: "rgba(0,0,0,.06)", borderRadius: 6,
+                padding: "2px 7px", lineHeight: 1.8,
+              }}>
+                예시
+              </div>
+              <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.65, fontStyle: "italic", whiteSpace: "pre-line" }}>
+                {word.example.replace(/\. /g, '.\n')}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 16 }}>
+            <button
+              onClick={() => onAskAI?.({ type: "word", title: word.word, body: word.explanation })}
+              style={{
+                padding: "9px 10px", background: "#fff",
+                border: "1px dashed rgba(59,91,255,.35)", borderRadius: 10,
+                fontSize: 13, fontWeight: 600, color: "var(--brand)",
+                cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
+              }}
+            >
+              <Sparkle s={11} c="var(--brand)" /> AI에게 물어보기
+            </button>
+            <button
+              onClick={onNext}
+              style={{
+                padding: "9px 10px", background: "var(--brand)", border: "none",
+                borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#fff",
+                cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
+              }}
+            >
+              다음 단어 <Chevron s={12} dir="right" c="#fff" />
+            </button>
+          </div>
         </div>
-        <div
-          style={{ fontSize: 14, color: "var(--muted)", fontStyle: "italic" }}
-        >
-          {word.pron}
-        </div>
+
       </div>
-      <div
-        style={{
-          fontSize: 14,
-          color: "var(--ink-2)",
-          lineHeight: 1.55,
-          fontWeight: 500,
-        }}
-      >
-        {word.def}
-      </div>
-      <div
-        style={{
-          marginTop: 10,
-          padding: "10px 12px",
-          borderLeft: "2px solid var(--line)",
-          fontSize: 14,
-          color: "var(--muted)",
-          lineHeight: 1.55,
-          fontStyle: "italic",
-          background: "var(--line-2)",
-        }}
-      >
-        예) {word.example}
-      </div>
-      <AskAICta
-        type="word"
-        label="이 단어, AI에게 더 설명해달라기"
-        onAskAI={onAskAI}
-        context={word.word}
-      />
     </div>
   );
 }
@@ -791,7 +947,7 @@ function TipCard({ tip }) {
   );
 }
 
-// ─── Personalized recommendation card ─────────────────────────────────────────
+// ─── Personalized recommendation hero banner ──────────────────────────────────
 function PersonalizedCard({ onAskAI }) {
   const [recIndex, setRecIndex] = useState(0);
   const recs = [
@@ -800,186 +956,366 @@ function PersonalizedCard({ onAskAI }) {
       title: "마케팅 직군 연봉 협상 타이밍, 언제가 좋을까요?",
       tag: "#연봉협상",
       meta: "마케팅 1–3년차 823명 참여",
+      img: curiousImg,
     },
     {
       type: "article",
       title: "신입 마케터 첫 3개월, 이것만은 꼭 챙기세요",
       tag: "#커리어",
       meta: "5분 읽기",
+      img: happyImg,
     },
     {
       type: "tip",
       title: "주간 보고 깔끔하게 쓰는 3단 구조",
       tag: "#업무스킬",
       meta: "카드뉴스",
+      img: thumbsUpImg,
     },
   ];
-  const typeColor = { poll: "#3B5BFF", article: "#D97757", tip: "#0EA5E9" };
-  const typeSoft = { poll: "#EEF1FF", article: "#FBEFE8", tip: "#E4F4FC" };
-  const typeLabel = { poll: "투표", article: "아티클", tip: "팁" };
+
+  const typeConfig = {
+    poll:    { label: "투표",   gradient: "linear-gradient(135deg,#3B5BFF 0%,#6B84FF 100%)" },
+    article: { label: "아티클", gradient: "linear-gradient(135deg,#0D9488 0%,#2DD4BF 100%)" },
+    tip:     { label: "팁",    gradient: "linear-gradient(135deg,#0EA5E9 0%,#38BDF8 100%)" },
+  };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setRecIndex((i) => (i + 1) % recs.length);
-    }, 3200);
-
+    const timer = setInterval(() => setRecIndex((i) => (i + 1) % recs.length), 3200);
     return () => clearInterval(timer);
   }, [recs.length]);
 
   return (
-    <section style={{ marginTop: 14 }}>
+    <section style={{ position: "relative", overflow: "hidden" }}>
+      {/* Slides */}
       <div
         style={{
-          padding: "0 20px 10px",
           display: "flex",
-          alignItems: "center",
-          gap: 6,
+          transform: `translateX(-${recIndex * 100}%)`,
+          transition: "transform .45s ease",
         }}
       >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--brand)"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
-        </svg>
-        <span
-          style={{
-            fontSize: 18,
-            fontWeight: 800,
-            letterSpacing: "-.025em",
-            color: "var(--ink)",
-          }}
-        >
-          {me.jobLabel} · {me.yearsLabel} 맞춤 추천
-        </span>
-      </div>
-      <div style={{ overflow: "hidden", padding: "0 20px 12px" }}>
-        <div
-          style={{
-            display: "flex",
-            transform: `translateX(-${recIndex * 100}%)`,
-            transition: "transform .45s ease",
-          }}
-        >
-          {recs.map((r, i) => (
-            <div key={i} style={{ flex: "0 0 100%", paddingRight: 0 }}>
-              <button
-                onClick={() => onAskAI?.(r.title)}
+        {recs.map((r, i) => {
+          const cfg = typeConfig[r.type];
+          return (
+            <button
+              key={i}
+              onClick={() => onAskAI?.(r.title)}
+              style={{
+                flex: "0 0 100%",
+                height: 260,
+                background: cfg.gradient,
+                border: "none",
+                cursor: "pointer",
+                padding: "28px 24px 52px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-start",
+                textAlign: "left",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Decorative circles */}
+              <div style={{
+                position: "absolute", right: -50, top: -50,
+                width: 200, height: 200, borderRadius: "50%",
+                background: "rgba(255,255,255,.08)", pointerEvents: "none",
+              }} />
+              <div style={{
+                position: "absolute", left: -30, bottom: -30,
+                width: 140, height: 140, borderRadius: "50%",
+                background: "rgba(255,255,255,.06)", pointerEvents: "none",
+              }} />
+
+              {/* Character image */}
+              <img
+                src={r.img}
+                alt=""
                 style={{
-                  width: "100%",
-                  minHeight: 154,
-                  textAlign: "left",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  background: "#fff",
-                  border: "1px solid var(--line-2)",
-                  borderRadius: 16,
-                  padding: "16px 16px 14px",
-                  cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(11,14,20,.05)",
+                  position: "absolute",
+                  right: 12,
+                  bottom: 20,
+                  height: 130,
+                  width: "auto",
+                  objectFit: "contain",
+                  pointerEvents: "none",
+                  userSelect: "none",
                 }}
-              >
-                <div>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "4px 9px",
-                      borderRadius: 99,
-                      background: typeSoft[r.type],
-                      fontSize: 11.5,
-                      fontWeight: 700,
-                      color: typeColor[r.type],
-                    }}
-                  >
-                    {typeLabel[r.type]}
+              />
+
+              <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* Top-left: type badge + tag/meta in a row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{
+                    fontSize: 11, fontWeight: 700, color: "#fff",
+                    background: "rgba(255,255,255,.22)",
+                    padding: "3px 10px", borderRadius: 99,
+                    flexShrink: 0,
+                  }}>
+                    {cfg.label}
                   </span>
-                  <div
-                    style={{
-                      marginTop: 12,
-                      fontSize: 17,
-                      fontWeight: 800,
-                      color: "var(--ink)",
-                      letterSpacing: "-.025em",
-                      lineHeight: 1.35,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {r.title}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    minWidth: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: typeColor[r.type],
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.9)" }}>
                     {r.tag}
                   </span>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      color: "var(--muted-2)",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,.65)" }}>
                     · {r.meta}
                   </span>
                 </div>
-              </button>
-            </div>
-          ))}
-        </div>
-        <div
+
+                {/* Title */}
+                <div style={{
+                  fontSize: 21, fontWeight: 800,
+                  color: "#fff", letterSpacing: "-.035em", lineHeight: 1.3,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}>
+                  {r.title}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Dot indicators */}
+      <div style={{
+        position: "absolute", bottom: 18, left: 0, right: 0,
+        display: "flex", justifyContent: "center", gap: 5,
+      }}>
+        {recs.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setRecIndex(i)}
+            aria-label={`추천 ${i + 1} 보기`}
+            style={{
+              width: recIndex === i ? 16 : 5,
+              height: 5,
+              borderRadius: 99,
+              border: "none",
+              background: recIndex === i ? "#fff" : "rgba(255,255,255,.4)",
+              padding: 0,
+              cursor: "pointer",
+              transition: "width .2s, background .2s",
+            }}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Quick menu ───────────────────────────────────────────────────────────────
+const QUICK_MENUS = [
+  {
+    label: "출석 체크",
+    color: "#3B5BFF",
+    icon: <img src={attendanceImg} alt="출석 체크" width={32} height={32} style={{ objectFit: "contain" }} />,
+  },
+  {
+    label: "직장인 투표",
+    color: "#16A34A",
+    icon: <img src={voteIconImg} alt="직장인 투표" width={32} height={32} style={{ objectFit: "contain" }} />,
+  },
+  {
+    label: "직장생활\n꿀팁 모음",
+    color: "#D97706",
+    icon: <img src={tipsImg} alt="직장생활 꿀팁 모음" width={32} height={32} style={{ objectFit: "contain" }} />,
+  },
+  {
+    label: "사회생활\n콘테스트",
+    color: "#7C3AED",
+    icon: <img src={contestImg} alt="사회생활 콘테스트" width={32} height={32} style={{ objectFit: "contain" }} />,
+  },
+];
+
+function QuickMenu() {
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      gap: 8,
+      padding: "18px 16px 14px",
+      marginTop: 20,
+      background: "#fff",
+    }}>
+      {QUICK_MENUS.map((m, i) => (
+        <button
+          key={i}
           style={{
             display: "flex",
-            justifyContent: "center",
-            gap: 5,
-            marginTop: 10,
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 7,
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            padding: "0 10px",
           }}
         >
-          {recs.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setRecIndex(i)}
-              aria-label={`추천 ${i + 1} 보기`}
-              style={{
-                width: recIndex === i ? 14 : 5,
-                height: 5,
+          <div style={{
+            width: 52,
+            height: 52,
+            color: m.color,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#EEF2FF",
+            borderRadius: 14,
+          }}>
+            {m.icon}
+          </div>
+          <span style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--ink-2)",
+            textAlign: "center",
+            lineHeight: 1.4,
+            whiteSpace: "pre-line",
+            wordBreak: "keep-all",
+          }}>
+            {m.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Weekly ranking ───────────────────────────────────────────────────────────
+const WEEKLY_RANKING = [
+  { rank: 2, nickname: "마케터J", job: "마케팅 4년차", score: 1842, avatarBg: "#C7D2FE", avatarColor: "#3730A3", initial: "J" },
+  { rank: 1, nickname: "직장인박과장", job: "기획 7년차", score: 3210, avatarBg: "#FDE68A", avatarColor: "#92400E", initial: "박" },
+  { rank: 3, nickname: "개발자K", job: "개발 2년차", score: 1490, avatarBg: "#BBF7D0", avatarColor: "#065F46", initial: "K" },
+];
+
+const RANK_CONFIG = {
+  1: { medal: "🥇", labelColor: "#B45309", labelBg: "#FEF3C7", podiumH: 56 },
+  2: { medal: "🥈", labelColor: "#4B5563", labelBg: "#F3F4F6", podiumH: 36 },
+  3: { medal: "🥉", labelColor: "#92400E", labelBg: "#FEF3C7", podiumH: 20 },
+};
+
+function WeeklyRanking() {
+  const order = [
+    WEEKLY_RANKING.find(u => u.rank === 2),
+    WEEKLY_RANKING.find(u => u.rank === 1),
+    WEEKLY_RANKING.find(u => u.rank === 3),
+  ];
+  const avatarSize = { 1: 68, 2: 54, 3: 54 };
+
+  return (
+    <section style={{ padding: "28px 20px 24px" }}>
+      {/* Title row */}
+      <div style={{
+        display: "flex", alignItems: "center",
+        justifyContent: "space-between", marginBottom: 28,
+      }}>
+        <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-.025em", color: "var(--ink)" }}>
+          이번주 랭킹
+        </span>
+        <button style={{
+          border: "none", background: "none", cursor: "pointer",
+          fontSize: 13.5, fontWeight: 600, color: "var(--muted)",
+          display: "inline-flex", alignItems: "center", gap: 3,
+        }}>
+          전체 보기 <Chevron s={12} dir="right" c="var(--muted)" />
+        </button>
+      </div>
+
+      {/* Podium */}
+      <div style={{
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        gap: 12,
+      }}>
+        {order.map((user) => {
+          const cfg = RANK_CONFIG[user.rank];
+          const size = avatarSize[user.rank];
+          const isFirst = user.rank === 1;
+          return (
+            <div key={user.rank} style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}>
+              {/* Medal */}
+              <span style={{ fontSize: isFirst ? 22 : 18, lineHeight: 1 }}>{cfg.medal}</span>
+
+              {/* Avatar */}
+              <div style={{
+                width: size,
+                height: size,
+                borderRadius: "50%",
+                background: user.avatarBg,
+                color: user.avatarColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: isFirst ? 22 : 18,
+                fontWeight: 800,
+                boxShadow: isFirst
+                  ? "0 4px 16px -4px rgba(59,91,255,.22)"
+                  : "0 2px 8px -2px rgba(11,14,20,.10)",
+                border: isFirst ? "2.5px solid #FCD34D" : "2px solid rgba(255,255,255,.8)",
+              }}>
+                {user.initial}
+              </div>
+
+              {/* Nickname + job */}
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: isFirst ? 13.5 : 12.5,
+                  fontWeight: 700,
+                  color: "var(--ink)",
+                  letterSpacing: "-.01em",
+                }}>
+                  {user.nickname}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--muted-2)", marginTop: 2 }}>
+                  {user.job}
+                </div>
+              </div>
+
+              {/* Score */}
+              <div style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: cfg.labelColor,
+                background: cfg.labelBg,
+                padding: "3px 10px",
                 borderRadius: 99,
-                border: "none",
-                background: recIndex === i ? "var(--brand)" : "var(--line)",
-                padding: 0,
-                cursor: "pointer",
-                transition: "width .2s, background .2s",
-              }}
-            />
-          ))}
-        </div>
+              }}>
+                {user.score.toLocaleString()}점
+              </div>
+
+              {/* Podium step */}
+              <div style={{
+                width: "100%",
+                height: cfg.podiumH,
+                borderRadius: "8px 8px 0 0",
+                background: isFirst
+                  ? "linear-gradient(180deg,#FDE68A,#FCD34D)"
+                  : "linear-gradient(180deg,var(--line-2),var(--line))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <span style={{
+                  fontSize: 15,
+                  fontWeight: 900,
+                  color: isFirst ? "#92400E" : "var(--muted)",
+                }}>
+                  {user.rank}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -988,6 +1324,17 @@ function PersonalizedCard({ onAskAI }) {
 // ─── ContentScreen ────────────────────────────────────────────────────────────
 export default function ContentScreen({ onAskAI }) {
   const [pollIndex, setPollIndex] = useState(0);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [points, setPoints] = useState(0);
+  const [toast, setToast] = useState({ visible: false, amount: 0 });
+  const toastTimerRef = useRef(null);
+
+  const handleEarnPoint = (p) => {
+    setPoints((prev) => prev + p);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ visible: true, amount: p });
+    toastTimerRef.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), 1600);
+  };
 
   const currentPoll =
     CONTENT_POLLS.length > 0
@@ -1003,10 +1350,17 @@ export default function ContentScreen({ onAskAI }) {
         minHeight: "100%",
       }}
     >
-      <Header />
+      <PointToast amount={toast.amount} visible={toast.visible} />
+      <Header points={points} />
 
       {/* 개인화 추천 */}
       <PersonalizedCard onAskAI={onAskAI} />
+
+      {/* 퀵메뉴 */}
+      <QuickMenu />
+
+      {/* 이번주 랭킹 */}
+      <WeeklyRanking />
 
       {/* 투표 */}
       <Section
@@ -1026,41 +1380,15 @@ export default function ContentScreen({ onAskAI }) {
       </Section>
 
       {/* 오늘의 단어 */}
-      <Section title="오늘의 단어" subtitle="직장인이라면 알아두면 좋은 용어">
+      <Section title="오늘의 단어" subtitle="직장 용어, 얼마나 알고 있나요?">
         <div style={{ padding: "0 24px" }}>
-          <WordCard word={CONTENT_WORDS[0]} onAskAI={onAskAI} />
-        </div>
-      </Section>
-
-      {/* 읽을거리 */}
-      <Section title="읽을거리" subtitle="주제별 심층 기사">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            padding: "0 24px",
-          }}
-        >
-          {CONTENT_ARTICLES.map((a, i) => (
-            <ArticleRow key={a.id} article={a} hero={i === 0} />
-          ))}
-        </div>
-      </Section>
-
-      {/* 콘테스트 */}
-      <Section title="진행 중 콘테스트" subtitle="참여하고 상금도 받아보세요">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            padding: "0 24px",
-          }}
-        >
-          {CONTENT_CONTESTS.map((c) => (
-            <ContestCard key={c.id} contest={c} />
-          ))}
+          <WordCard
+            key={CONTENT_WORDS[wordIndex % CONTENT_WORDS.length].id}
+            word={CONTENT_WORDS[wordIndex % CONTENT_WORDS.length]}
+            onAskAI={onAskAI}
+            onNext={() => setWordIndex((i) => i + 1)}
+            onEarnPoint={handleEarnPoint}
+          />
         </div>
       </Section>
 
@@ -1076,6 +1404,22 @@ export default function ContentScreen({ onAskAI }) {
         >
           {CONTENT_TIPS.map((t) => (
             <TipCard key={t.id} tip={t} />
+          ))}
+        </div>
+      </Section>
+
+      {/* 읽을거리 */}
+      <Section title="읽을거리" subtitle="주제별 심층 기사">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            padding: "0 24px",
+          }}
+        >
+          {CONTENT_ARTICLES.map((a, i) => (
+            <ArticleRow key={a.id} article={a} hero={i === 0} />
           ))}
         </div>
       </Section>

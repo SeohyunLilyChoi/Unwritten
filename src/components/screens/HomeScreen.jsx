@@ -1383,10 +1383,10 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
           </div>
           <button
             onClick={() => setSearching((s) => !s)}
-            className={`w-[34px] h-[34px] rounded-[10px] border flex items-center justify-center transition-colors ${
+            className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
               searching
-                ? "border-brand-blue text-brand-blue bg-brand-blue-light"
-                : "border-gray-200 text-gray-500 bg-white"
+                ? "text-brand-blue bg-brand-blue-light"
+                : "text-gray-500 bg-white"
             }`}
           >
             <svg

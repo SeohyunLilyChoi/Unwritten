@@ -90,10 +90,42 @@ export const CONTENT_CONTESTS = [
 export const CONTENT_WORDS = [
   {
     id: 'word-1', type: 'word', topic: 'comm',
-    word: '컴해요', pron: '[Come해요]',
-    tag: '커뮤니케이션 약어',
-    def: '"커뮤니케이션 해요"의 줄임말. 메신저 상에서 짧게 알림/요청할 때 쓰여요.',
-    example: '"오늘 3시 전에 이 자료 컴해요?" — 부장님이 쓰시면 당황하지 말고 침착하게.',
+    word: '컴해요',
+    options: [
+      '퇴근 인사 표현',
+      '커뮤니케이션 해요의 줄임말',
+      '컴플레인 제기 표현',
+      '컴퓨터 작업 부탁 표현',
+    ],
+    answer: 1,
+    explanation: '"커뮤니케이션 해요"의 줄임말. 메신저 상에서 짧게 알림/요청할 때 쓰여요.',
+    example: '"오늘 3시 전에 이 자료 컴해요?"',
+  },
+  {
+    id: 'word-2', type: 'word', topic: 'work',
+    word: '롤백',
+    options: [
+      '새 프로젝트 시작 표현',
+      '승인 재요청 표현',
+      '이전 상태로 되돌리는 표현',
+      '업무 위임 표현',
+    ],
+    answer: 2,
+    explanation: '원래 IT 용어지만, 직장에서는 "결정이나 작업을 이전 상태로 되돌린다"는 뜻으로 폭넓게 쓰여요.',
+    example: '"이번 기획안 방향성 다시 롤백해서 처음 안으로 가죠."',
+  },
+  {
+    id: 'word-3', type: 'word', topic: 'culture',
+    word: '사바사',
+    options: [
+      '사장님 바라기 사원의 줄임말',
+      '사람마다 다르다는 뜻의 줄임말',
+      '사무실 바깥 사생활 표현',
+      '사내 바이럴 사례 줄임말',
+    ],
+    answer: 1,
+    explanation: '"사람 바이 사람(Person by Person)"의 줄임말. 상황이나 결과가 사람마다 다를 때 써요.',
+    example: '"야근 강요 여부는 사바사예요. 팀장 스타일에 따라 완전히 달라져요."',
   },
 ]
 
