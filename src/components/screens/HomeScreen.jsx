@@ -1200,85 +1200,29 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const [searching, setSearching] = useState(false);
   const [job, setJob] = useState(me.job);
   const [years, setYears] = useState(me.years);
-  const [scrollSpacerHeight, setScrollSpacerHeight] = useState(0);
   const [openAttachment, setOpenAttachment] = useState(null);
   const feedRef = useRef(null);
-  const lastCardRef = useRef(null);
-  const secondLastCardRef = useRef(null);
-  const alignTargetCardRef = useRef(null);
-  const pendingAlignTargetIdRef = useRef(null);
-  const pendingNewQuestionAlignRef = useRef(false);
-  const pendingCategoryBottomScrollRef = useRef(false);
-  const pendingAllAlignRef = useRef(false);
   const visibleThreads =
     selectedCategory === "all"
       ? threads
       : threads.filter((thread) => thread.category === selectedCategory);
 
-  const alignSecondLastCardToFeedTop = useCallback(() => {
-    const feed = feedRef.current;
-    const card =
-      pendingNewQuestionAlignRef.current && alignTargetCardRef.current
-        ? alignTargetCardRef.current
-        : secondLastCardRef.current;
-    if (!feed || !card) return;
-
-    feed.scrollTop = card.offsetTop + card.offsetHeight;
-  }, []);
-
   useEffect(() => {
     requestAnimationFrame(() => {
-      alignSecondLastCardToFeedTop();
+      if (feedRef.current) feedRef.current.scrollTop = 0;
     });
-  }, [alignSecondLastCardToFeedTop]);
-
-  useLayoutEffect(() => {
-    if (!pendingNewQuestionAlignRef.current) return undefined;
-
-    const frame = requestAnimationFrame(() => {
-      alignSecondLastCardToFeedTop();
-    });
-
-    const timer = setTimeout(() => {
-      alignSecondLastCardToFeedTop();
-      pendingNewQuestionAlignRef.current = false;
-    }, 350);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(timer);
-    };
-  }, [threads.length, openId, alignSecondLastCardToFeedTop]);
+  }, []);
 
   const handleToggle = useCallback((id) => {
     setOpenId((prev) => (prev === id ? null : id));
   }, []);
 
-  useLayoutEffect(() => {
-    if (!pendingCategoryBottomScrollRef.current) return;
-
-    if (feedRef.current) {
-      feedRef.current.scrollTop = feedRef.current.scrollHeight;
-    }
-    pendingCategoryBottomScrollRef.current = false;
-  }, [selectedCategory, visibleThreads.length, openId]);
-
-  useLayoutEffect(() => {
-    if (!pendingAllAlignRef.current) return undefined;
-
-    alignSecondLastCardToFeedTop();
-    pendingAllAlignRef.current = false;
-
-    return undefined;
-  }, [selectedCategory, openId, visibleThreads.length, alignSecondLastCardToFeedTop]);
-
   const handleCategorySelect = useCallback((categoryId) => {
-    pendingAllAlignRef.current = categoryId === "all";
-    pendingCategoryBottomScrollRef.current = categoryId !== "all";
-    setOpenId(
-      categoryId === "all" ? (threads[threads.length - 1]?.id ?? null) : null,
-    );
+    setOpenId(categoryId === "all" ? (threads[0]?.id ?? null) : null);
     setSelectedCategory(categoryId);
+    requestAnimationFrame(() => {
+      if (feedRef.current) feedRef.current.scrollTop = 0;
+    });
   }, [threads]);
 
   const handleFeedback = useCallback((threadId, type) => {
@@ -1319,30 +1263,27 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
 
   const handleNewQuestion = useCallback(async (question, attachment = null) => {
     const id = ++nextId;
-    pendingNewQuestionAlignRef.current = true;
-    setScrollSpacerHeight(feedRef.current?.clientHeight ?? 0);
-    setThreads((prev) => {
-      pendingAlignTargetIdRef.current = prev[prev.length - 1]?.id ?? null;
-
-      return [
-        ...prev,
-        {
-          id,
-          title: "...",
-          category: "all",
-          question,
-          attachment,
-          tags: [],
-          timestamp: "방금",
-          isLoadingTitle: true,
-          isLoadingAnswer: true,
-          aiAnswer: null,
-          followUps: [],
-          feedback: null,
-        },
-      ];
-    });
+    setThreads((prev) => [
+      {
+        id,
+        title: "...",
+        category: "all",
+        question,
+        attachment,
+        tags: [],
+        timestamp: "방금",
+        isLoadingTitle: true,
+        isLoadingAnswer: true,
+        aiAnswer: null,
+        followUps: [],
+        feedback: null,
+      },
+      ...prev,
+    ]);
     setOpenId(id);
+    requestAnimationFrame(() => {
+      if (feedRef.current) feedRef.current.scrollTop = 0;
+    });
 
     await delay(800);
     const title =
@@ -1471,37 +1412,22 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
         style={{ background: "#F5F7FF" }}
       >
         <AnimatePresence mode="popLayout" initial={false}>
-          {visibleThreads.map((thread, idx) => {
-            const isLast = idx === visibleThreads.length - 1;
-            const isSecondLast = idx === visibleThreads.length - 2;
-            const isPendingAlignTarget =
-              pendingNewQuestionAlignRef.current &&
-              thread.id === pendingAlignTargetIdRef.current;
-            return (
-              <ThreadItem
-                key={thread.id}
-                thread={thread}
-                isOpen={openId === thread.id}
-                onToggle={() => handleToggle(thread.id)}
-                onFeedback={(type) => handleFeedback(thread.id, type)}
-                onFollowUp={handleFollowUp}
-                job={job}
-                years={years}
-                onJobChange={setJob}
-                onYearsChange={setYears}
-                onOpenAttachment={setOpenAttachment}
-                cardRef={
-                  isPendingAlignTarget
-                    ? alignTargetCardRef
-                    : isLast
-                      ? lastCardRef
-                      : isSecondLast
-                        ? secondLastCardRef
-                        : null
-                }
-              />
-            );
-          })}
+          {visibleThreads.map((thread) => (
+            <ThreadItem
+              key={thread.id}
+              thread={thread}
+              isOpen={openId === thread.id}
+              onToggle={() => handleToggle(thread.id)}
+              onFeedback={(type) => handleFeedback(thread.id, type)}
+              onFollowUp={handleFollowUp}
+              job={job}
+              years={years}
+              onJobChange={setJob}
+              onYearsChange={setYears}
+              onOpenAttachment={setOpenAttachment}
+              cardRef={null}
+            />
+          ))}
         </AnimatePresence>
 
         {visibleThreads.length === 0 && (
@@ -1514,9 +1440,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
               직장생활의 고민을 AI에게 물어보세요
             </p>
           </div>
-        )}
-        {scrollSpacerHeight > 0 && (
-          <div aria-hidden="true" style={{ height: scrollSpacerHeight }} />
         )}
       </div>
 
