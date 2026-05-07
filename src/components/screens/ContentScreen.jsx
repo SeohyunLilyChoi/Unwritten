@@ -11,6 +11,7 @@ import tipsImg from "../images/tips.png";
 import contestImg from "../images/contest.png";
 import happyImg from "../images/happy.png";
 import thumbsUpImg from "../images/thumbs_up.png";
+import faceImg from "../images/face.png";
 import {
   CONTENT_TYPES,
   CONTENT_POLLS,
@@ -1487,8 +1488,8 @@ const WEEKLY_RANKING = [
     nickname: "마케터J",
     job: "마케팅 4년차",
     score: 1842,
-    avatarBg: "#C7D2FE",
-    avatarColor: "#3730A3",
+    avatarBg: "#7B8FFF",
+    avatarColor: "#fff",
     initial: "J",
   },
   {
@@ -1496,8 +1497,8 @@ const WEEKLY_RANKING = [
     nickname: "직장인박과장",
     job: "기획 7년차",
     score: 3210,
-    avatarBg: "#FDE68A",
-    avatarColor: "#92400E",
+    avatarBg: "#4F6EFF",
+    avatarColor: "#fff",
     initial: "박",
   },
   {
@@ -1505,8 +1506,8 @@ const WEEKLY_RANKING = [
     nickname: "개발자K",
     job: "개발 2년차",
     score: 1490,
-    avatarBg: "#BBF7D0",
-    avatarColor: "#065F46",
+    avatarBg: "#8B72FF",
+    avatarColor: "#fff",
     initial: "K",
   },
 ];
@@ -1514,7 +1515,7 @@ const WEEKLY_RANKING = [
 const RANK_CONFIG = {
   1: { medal: "🥇", labelColor: "#B45309", labelBg: "#FEF3C7", podiumH: 56 },
   2: { medal: "🥈", labelColor: "#4B5563", labelBg: "#F3F4F6", podiumH: 36 },
-  3: { medal: "🥉", labelColor: "#92400E", labelBg: "#FEF3C7", podiumH: 20 },
+  3: { medal: "🥉", labelColor: "#4B5563", labelBg: "#F3F4F6", podiumH: 20 },
 };
 
 function WeeklyRanking() {
@@ -1613,7 +1614,7 @@ function WeeklyRanking() {
                     : "2px solid rgba(255,255,255,.8)",
                 }}
               >
-                {user.initial}
+                <img src={faceImg} alt="" style={{ width: "62%", height: "62%", objectFit: "contain" }} />
               </div>
 
               {/* Nickname + job */}
@@ -1650,7 +1651,7 @@ function WeeklyRanking() {
                   borderRadius: 99,
                 }}
               >
-                {user.score.toLocaleString()}점
+                +{user.score.toLocaleString()}P
               </div>
 
               {/* Podium step */}

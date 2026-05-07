@@ -4,6 +4,7 @@ import {
   useEffect,
   useLayoutEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -15,12 +16,18 @@ import {
   MOCK_NEW_ANSWER,
   MOCK_FOLLOWUP_ANSWER,
 } from "../../data/mockData";
+import { CONTENT_ARTICLES } from "../../data/contentData";
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 const composerPlaceholders = [
   "출근 몇시까지 해야할까?",
   "점심 혼자 먹어도 될까?",
   "퇴근하고 싶어",
+];
+const suggestedQuestions = [
+  "출근 몇 시까지 가야 자연스러울까?",
+  "점심 혼자 먹겠다고 말해도 될까?",
+  "팀장님께 실수한 걸 어떻게 말하지?",
 ];
 
 // ─── Skeleton ──────────────────────────────────────────────────────────────────
@@ -104,9 +111,9 @@ function DataCard({ dataCard, job, years, onJobChange, onYearsChange }) {
             {view.n.toLocaleString()}명 응답
           </p>
         </div>
-      <button
-        type="button"
-        onClick={handleToggleProfile}
+        <button
+          type="button"
+          onClick={handleToggleProfile}
           aria-pressed={isMyProfile}
           className="shrink-0 h-8 flex items-center gap-2 text-xs font-semibold text-gray-500"
         >
@@ -694,9 +701,13 @@ function AIAnswerBody({
       <p className="text-[17px] font-bold text-gray-900 leading-snug">
         {aiAnswer.headline}
       </p>
-      <p className="mt-1 text-[15px] font-medium text-gray-900 mb-1.5">{aiAnswer.highlight}</p>
+      <p className="mt-1 text-[15px] font-medium text-gray-900 mb-1.5">
+        {aiAnswer.highlight}
+      </p>
 
-      {(aiAnswer.dataSummary || aiAnswer.communitySummary || aiAnswer.evidenceSummary) && (
+      {(aiAnswer.dataSummary ||
+        aiAnswer.communitySummary ||
+        aiAnswer.evidenceSummary) && (
         <div className="mt-4 space-y-1.5 text-sm text-gray-600 leading-relaxed">
           {aiAnswer.dataSummary && (
             <p className="flex items-start gap-2.5">
@@ -710,9 +721,9 @@ function AIAnswerBody({
               <span className="break-keep">{aiAnswer.communitySummary}</span>
             </p>
           )}
-          {!aiAnswer.dataSummary && !aiAnswer.communitySummary && aiAnswer.evidenceSummary && (
-            <p>{aiAnswer.evidenceSummary}</p>
-          )}
+          {!aiAnswer.dataSummary &&
+            !aiAnswer.communitySummary &&
+            aiAnswer.evidenceSummary && <p>{aiAnswer.evidenceSummary}</p>}
         </div>
       )}
 
@@ -1056,6 +1067,51 @@ function ThreadItem({
   );
 }
 
+function ArchiveArticleRow({ article, hero = false }) {
+  if (hero) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+        <div
+          className="relative h-[148px]"
+          style={{ background: article.cover }}
+        >
+          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-[#8E4322]">
+            {article.tag}
+          </span>
+        </div>
+        <div className="px-3.5 py-3">
+          <p className="text-[15px] font-extrabold leading-snug text-gray-900">
+            {article.title}
+          </p>
+          <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-relaxed text-gray-500">
+            {article.excerpt}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-3">
+      <div
+        className="h-[86px] w-[92px] shrink-0 rounded-xl"
+        style={{ background: article.cover }}
+      />
+      <div className="min-w-0 flex-1">
+        <div className="mb-1.5 text-xs font-bold text-[#8E4322]">
+          {article.tag}
+        </div>
+        <p className="line-clamp-2 text-[14px] font-extrabold leading-snug text-gray-900">
+          {article.title}
+        </p>
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
+          {article.excerpt}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── BottomComposer ───────────────────────────────────────────────────────────
 function BottomComposer({
   onSubmit,
@@ -1067,7 +1123,26 @@ function BottomComposer({
   const [attachment, setAttachment] = useState(null);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [composerHeight, setComposerHeight] = useState(74);
   const textareaRef = useRef(null);
+  const composerRef = useRef(null);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      setKeyboardHeight(
+        Math.max(0, window.innerHeight - vv.height - vv.offsetTop),
+      );
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
   const placeholderText = isFocused
     ? "오늘의 고민은 무엇인가요?"
     : composerPlaceholders[placeholderIndex];
@@ -1096,6 +1171,31 @@ function BottomComposer({
     return () => clearInterval(timer);
   }, [isFocused]);
 
+  useEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) return undefined;
+
+    const updateHeight = () => {
+      setComposerHeight(Math.ceil(composer.getBoundingClientRect().height));
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(composer);
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
   const adjustHeight = () => {
     const el = textareaRef.current;
     if (!el) return;
@@ -1106,6 +1206,15 @@ function BottomComposer({
   const handleChange = (e) => {
     setText(e.target.value);
     adjustHeight();
+  };
+
+  const handleSuggestionClick = (question) => {
+    setText(question);
+    setAttachment(null);
+    requestAnimationFrame(() => {
+      adjustHeight();
+      textareaRef.current?.focus();
+    });
   };
 
   const handleSubmit = () => {
@@ -1123,63 +1232,153 @@ function BottomComposer({
     }
   };
 
+  const composerBottom =
+    keyboardHeight > 0
+      ? `${keyboardHeight}px`
+      : "calc(64px + env(safe-area-inset-bottom, 0px))";
+  const suggestionsBottom =
+    keyboardHeight > 0
+      ? `${keyboardHeight + composerHeight + 28}px`
+      : `calc(64px + env(safe-area-inset-bottom, 0px) + ${composerHeight + 28}px)`;
+
   return (
-    <div
-      className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-white border-t border-gray-100 px-4 py-2.5"
-      style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
-    >
-      {["poll", "community"].includes(attachment?.type) && (
-        <AttachmentPreview
-          attachment={attachment}
-          onRemove={() => setAttachment(null)}
-          onOpen={onOpenAttachment}
-          className="mb-2"
-        />
-      )}
-      <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
-        <div className="relative flex-1">
-          {!text && (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={placeholderText}
-                className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
-                initial={{ y: 8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -8, opacity: 0 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-              >
-                {placeholderText}
-              </motion.div>
-            </AnimatePresence>
-          )}
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder=""
-            rows={1}
-            className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
-            style={{ minHeight: 20, maxHeight: 100 }}
+    <>
+      <AnimatePresence>
+        {isFocused && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="fixed inset-0 z-20"
+            style={{ background: "rgba(11,14,20,.25)" }}
+            onMouseDown={() => textareaRef.current?.blur()}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isFocused && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="fixed inset-x-0 z-30 mx-auto w-full max-w-[430px] px-4"
+            style={{
+              bottom: suggestionsBottom,
+              transition: "bottom 0.25s ease",
+            }}
+          >
+            <div className="flex flex-col items-start gap-2">
+              <p className="mb-1 text-[16px] font-extrabold text-gray-900">
+                지금 2년차 마케팅 동료들이 궁금해해요
+              </p>
+              {suggestedQuestions.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleSuggestionClick(question)}
+                  className="w-2/3 rounded-xl border border-[#E1E6F2] bg-white px-3.5 py-3 text-left text-sm font-semibold leading-snug text-gray-700 shadow-sm transition-colors active:bg-brand-blue-light"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        ref={composerRef}
+        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-white px-4"
+        style={{
+          bottom: composerBottom,
+          transition: "bottom 0.25s ease",
+        }}
+        animate={
+          isFocused
+            ? {
+                borderRadius: "20px 20px 0 0",
+                paddingTop: 12,
+                paddingBottom: 20,
+                boxShadow: "0 -8px 32px rgba(11,14,20,.12)",
+              }
+            : {
+                borderRadius: "0px",
+                paddingTop: 10,
+                paddingBottom: 10,
+                boxShadow: "0 -1px 0 #F3F4F6",
+              }
+        }
+        transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+      >
+        {isFocused && (
+          <div
+            style={{
+              width: 36,
+              height: 4,
+              background: "#E2E8F0",
+              borderRadius: 99,
+              margin: "0 auto 14px",
+            }}
+          />
+        )}
+
+        {["poll", "community"].includes(attachment?.type) && (
+          <AttachmentPreview
+            attachment={attachment}
+            onRemove={() => setAttachment(null)}
+            onOpen={onOpenAttachment}
+            className="mb-2"
+          />
+        )}
+        <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
+          <div className="relative flex-1">
+            {!text && (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={placeholderText}
+                  className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
+                  initial={{ y: 8, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -8, opacity: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                >
+                  {placeholderText}
+                </motion.div>
+              </AnimatePresence>
+            )}
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder=""
+              rows={1}
+              className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
+              style={{ minHeight: 20, maxHeight: 100 }}
+            />
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={!text.trim() && !attachment}
+            className={`shrink-0 w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
+              text.trim() || attachment
+                ? "bg-brand-blue text-white"
+                : "bg-gray-100 text-gray-300"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={!text.trim() && !attachment}
-          className={`shrink-0 w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
-            text.trim() || attachment
-              ? "bg-brand-blue text-white"
-              : "bg-gray-100 text-gray-300"
-          }`}
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-          </svg>
-        </button>
-      </div>
-    </div>
+      </motion.div>
+    </>
   );
 }
 
@@ -1198,6 +1397,9 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   );
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searching, setSearching] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [showQuestionSummary, setShowQuestionSummary] = useState(true);
+  const [summaryIndex, setSummaryIndex] = useState(0);
   const [job, setJob] = useState(me.job);
   const [years, setYears] = useState(me.years);
   const [openAttachment, setOpenAttachment] = useState(null);
@@ -1206,24 +1408,66 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
     selectedCategory === "all"
       ? threads
       : threads.filter((thread) => thread.category === selectedCategory);
+  const keywordStats = useMemo(() => {
+    const counts = threads.reduce((acc, thread) => {
+      (thread.tags || []).forEach((tag) => {
+        const keyword = tag.replace(/^#/, "");
+        acc[keyword] = (acc[keyword] || 0) + 1;
+      });
+      return acc;
+    }, {});
+
+    const topKeywords = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+    const maxCount = Math.max(...topKeywords.map(([, count]) => count), 1);
+
+    return topKeywords.map(([keyword, count]) => ({
+      keyword,
+      count,
+      width: `${Math.max(24, (count / maxCount) * 100)}%`,
+    }));
+  }, [threads]);
+  const topKeywordLabel = keywordStats[0]?.keyword ?? "직장생활";
 
   useEffect(() => {
     requestAnimationFrame(() => {
       if (feedRef.current) feedRef.current.scrollTop = 0;
+      setShowQuestionSummary(true);
     });
   }, []);
+
+  useEffect(() => {
+    if (!showQuestionSummary) return undefined;
+
+    const timer = setInterval(() => {
+      setSummaryIndex((index) => (index + 1) % 3);
+    }, 3600);
+
+    return () => clearInterval(timer);
+  }, [showQuestionSummary]);
 
   const handleToggle = useCallback((id) => {
     setOpenId((prev) => (prev === id ? null : id));
   }, []);
 
-  const handleCategorySelect = useCallback((categoryId) => {
-    setOpenId(categoryId === "all" ? (threads[0]?.id ?? null) : null);
-    setSelectedCategory(categoryId);
-    requestAnimationFrame(() => {
-      if (feedRef.current) feedRef.current.scrollTop = 0;
-    });
-  }, [threads]);
+  const handleCategorySelect = useCallback(
+    (categoryId) => {
+      setOpenId(categoryId === "all" ? (threads[0]?.id ?? null) : null);
+      setSelectedCategory(categoryId);
+      setShowQuestionSummary(true);
+      requestAnimationFrame(() => {
+        if (feedRef.current) feedRef.current.scrollTop = 0;
+      });
+    },
+    [threads],
+  );
+
+  const handleFeedScroll = useCallback(() => {
+    if (showArchive) return;
+    const scrollTop = feedRef.current?.scrollTop ?? 0;
+    setShowQuestionSummary(scrollTop <= 2);
+  }, [showArchive]);
 
   const handleFeedback = useCallback((threadId, type) => {
     setThreads((prev) =>
@@ -1281,6 +1525,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
       ...prev,
     ]);
     setOpenId(id);
+    setShowQuestionSummary(true);
     requestAnimationFrame(() => {
       if (feedRef.current) feedRef.current.scrollTop = 0;
     });
@@ -1302,9 +1547,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
           : t,
       ),
     );
-    requestAnimationFrame(() => {
-      setScrollSpacerHeight(0);
-    });
   }, []);
 
   return (
@@ -1312,143 +1554,353 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
       {/* Fixed header */}
       <div className="bg-white z-20 shrink-0">
         {/* App bar */}
-        <div className="flex items-center justify-between px-5 pt-[14px] pb-[10px]">
-          <div className="flex items-center gap-[6px]">
-            <h1
-              className="text-[20px] font-extrabold text-gray-900"
-              style={{ letterSpacing: "-0.03em" }}
+        {showArchive ? (
+          <div className="relative flex items-center justify-center px-5 pt-[14px] pb-[10px]">
+            <button
+              type="button"
+              aria-label="질문 페이지로 돌아가기"
+              onClick={() => setShowArchive(false)}
+              className="absolute left-5 top-[14px] w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-700 bg-white transition-colors active:bg-gray-50"
             >
-              unwritten
-            </h1>
-            <div className="w-[5px] h-[5px] rounded-full bg-brand-blue" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h2 className="text-[17px] font-extrabold text-gray-900">
+              질문 아카이브
+            </h2>
+            <button
+              type="button"
+              aria-label="질문 아카이브 검색"
+              className="absolute right-5 top-[14px] w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-500 bg-white transition-colors active:bg-gray-50"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={() => setSearching((s) => !s)}
-            className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
-              searching
-                ? "text-brand-blue bg-brand-blue-light"
-                : "text-gray-500 bg-white"
-            }`}
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Expandable search bar */}
-        <AnimatePresence>
-          {searching && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="mx-5 mb-2 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+        ) : (
+          <div className="flex items-center justify-between px-5 pt-[14px] pb-[10px]">
+            <div className="flex items-center gap-[6px]">
+              <h1
+                className="text-[20px] font-extrabold text-gray-900"
+                style={{ letterSpacing: "-0.03em" }}
+              >
+                unwritten
+              </h1>
+              <div className="w-[5px] h-[5px] rounded-full bg-brand-blue" />
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSearching((s) => !s)}
+                className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
+                  searching
+                    ? "text-brand-blue bg-brand-blue-light"
+                    : "text-gray-500 bg-white"
+                }`}
+              >
                 <svg
-                  className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                   strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>
-                <input
-                  autoFocus
-                  placeholder="지난 대화에서 찾기"
-                  className="flex-1 text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent"
-                />
-                <button
-                  onClick={() => setSearching(false)}
-                  className="text-sm text-gray-400 font-medium"
+              </button>
+              <button
+                type="button"
+                aria-label="질문 보관함"
+                onClick={() => {
+                  setSearching(false);
+                  setShowArchive(true);
+                }}
+                className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-500 bg-white transition-colors active:bg-gray-50"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  취소
-                </button>
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!showArchive && (
+          <>
+            {/* Expandable search bar */}
+            <AnimatePresence>
+              {searching && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mx-5 mb-2 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20l-3.5-3.5" />
+                    </svg>
+                    <input
+                      autoFocus
+                      placeholder="지난 대화에서 찾기"
+                      className="flex-1 text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+                    />
+                    <button
+                      onClick={() => setSearching(false)}
+                      className="text-sm text-gray-400 font-medium"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Question summary placeholder */}
+            <motion.div
+              className="overflow-hidden bg-white"
+              initial={false}
+              animate={{
+                height: showQuestionSummary ? 282 : 0,
+                opacity: showQuestionSummary ? 1 : 0,
+              }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <div className="relative h-[282px] pt-3 pb-10 bg-white">
+            <p className="px-5 text-[20px] font-extrabold leading-snug text-gray-900">
+              000님, 좋은 아침입니다!
+            </p>
+            <div
+              className="mt-5 flex"
+              style={{
+                transform: `translateX(-${summaryIndex * 100}%)`,
+                transition: "transform .45s ease",
+              }}
+            >
+              <div className="min-w-full px-5">
+                <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
+                  최근 {topKeywordLabel} 관련 질문이 많았어요.
+                </p>
+                <div className="mt-3.5 rounded-[10px] border border-[#E1E6F2] bg-white px-3.5 py-3.5">
+                  <p className="mb-2.5 text-[13px] font-bold text-gray-400">
+                    최근 질문 키워드 top3
+                  </p>
+                  <div className="space-y-2">
+                    {keywordStats.map((item, index) => (
+                      <div
+                        key={item.keyword}
+                        className="grid items-center gap-2.5"
+                        style={{ gridTemplateColumns: "116px 1fr" }}
+                      >
+                        <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-gray-700">
+                          <span className="shrink-0 text-gray-400">
+                            {index + 1}
+                          </span>
+                          <span className="truncate">{item.keyword}</span>
+                        </span>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-gray-100">
+                          <motion.div
+                            className={
+                              index === 0
+                                ? "h-full rounded-full bg-brand-blue"
+                                : "h-full rounded-full bg-[#DCE3FF]"
+                            }
+                            initial={false}
+                            animate={{ width: item.width }}
+                            transition={{ duration: 0.28, ease: "easeOut" }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="min-w-full px-5">
+                <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
+                  지금 핫한 '{topKeywordLabel}' 관련 콘텐츠
+                </p>
+                <div className="mt-3.5 grid grid-cols-2 gap-2">
+                  {["콘텐츠", "커뮤니티"].map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      className="h-[126px] rounded-[10px] bg-[#F3F5FB] px-2 text-sm font-bold text-gray-700 transition-colors active:bg-brand-blue-light"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="min-w-full px-5">
+                <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
+                  마케팅, 2년차 사용자들의 활발한 논의
+                </p>
+                <div className="mt-3.5 h-[126px] rounded-[10px] bg-[#F3F5FB]" />
+              </div>
+            </div>
+            <div className="absolute bottom-6 left-5 flex gap-1.5">
+              {[0, 1, 2].map((index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`요약 ${index + 1} 보기`}
+                  onClick={() => setSummaryIndex(index)}
+                  className={`h-[5px] rounded-full transition-all ${
+                    summaryIndex === index
+                      ? "w-4 bg-brand-blue"
+                      : "w-[5px] bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Category chips */}
-        <div
-          className="flex gap-2 px-5 pb-3 overflow-x-auto border-b border-gray-100"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {categoryChips.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => handleCategorySelect(c.id)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
-                selectedCategory === c.id
-                  ? "bg-brand-blue text-white border-brand-blue"
-                  : "bg-white text-gray-700 border-gray-200"
-              }`}
-              style={{ minHeight: 34 }}
+            {/* Category chips */}
+            <div
+              className="flex gap-2 px-5 pt-4 pb-3 overflow-x-auto border-b border-gray-100"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {c.label}
-            </button>
-          ))}
-        </div>
-
+              {categoryChips.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => handleCategorySelect(c.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
+                    selectedCategory === c.id
+                      ? "bg-brand-blue text-white border-brand-blue"
+                      : "bg-white text-gray-700 border-gray-200"
+                  }`}
+                  style={{ minHeight: 34 }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {showArchive && (
+          <div
+            className="flex gap-2 px-5 pt-4 pb-3 overflow-x-auto border-b border-gray-100"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {categoryChips.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => handleCategorySelect(c.id)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
+                  selectedCategory === c.id
+                    ? "bg-brand-blue text-white border-brand-blue"
+                    : "bg-white text-gray-700 border-gray-200"
+                }`}
+                style={{ minHeight: 34 }}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Thread feed — independent scroll */}
       <div
         ref={feedRef}
-        className="flex-1 overflow-y-auto px-4 pt-4 pb-28"
+        onScroll={handleFeedScroll}
+        className={`flex-1 overflow-y-auto px-4 pt-4 ${showArchive ? "pb-4" : "pb-28"}`}
         style={{ background: "#F5F7FF" }}
       >
-        <AnimatePresence mode="popLayout" initial={false}>
-          {visibleThreads.map((thread) => (
-            <ThreadItem
-              key={thread.id}
-              thread={thread}
-              isOpen={openId === thread.id}
-              onToggle={() => handleToggle(thread.id)}
-              onFeedback={(type) => handleFeedback(thread.id, type)}
-              onFollowUp={handleFollowUp}
-              job={job}
-              years={years}
-              onJobChange={setJob}
-              onYearsChange={setYears}
-              onOpenAttachment={setOpenAttachment}
-              cardRef={null}
-            />
-          ))}
-        </AnimatePresence>
-
-        {visibleThreads.length === 0 && (
-          <div className="flex flex-col items-center justify-center pt-24 text-center px-8">
-            <p className="text-3xl mb-3">✏️</p>
-            <p className="text-base font-bold text-gray-800 mb-1.5">
-              해당 주제의 질문이 없어요
-            </p>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              직장생활의 고민을 AI에게 물어보세요
-            </p>
+        {showArchive ? (
+          <div className="pb-6">
+            <div className="flex flex-col gap-2.5">
+              {CONTENT_ARTICLES.map((article, index) => (
+                <ArchiveArticleRow
+                  key={article.id}
+                  article={article}
+                  hero={index === 0}
+                />
+              ))}
+            </div>
           </div>
+        ) : (
+          <>
+            <AnimatePresence mode="popLayout" initial={false}>
+              {visibleThreads.map((thread) => (
+                <ThreadItem
+                  key={thread.id}
+                  thread={thread}
+                  isOpen={openId === thread.id}
+                  onToggle={() => handleToggle(thread.id)}
+                  onFeedback={(type) => handleFeedback(thread.id, type)}
+                  onFollowUp={handleFollowUp}
+                  job={job}
+                  years={years}
+                  onJobChange={setJob}
+                  onYearsChange={setYears}
+                  onOpenAttachment={setOpenAttachment}
+                  cardRef={null}
+                />
+              ))}
+            </AnimatePresence>
+
+            {visibleThreads.length === 0 && (
+              <div className="flex flex-col items-center justify-center pt-24 text-center px-8">
+                <p className="text-3xl mb-3">✏️</p>
+                <p className="text-base font-bold text-gray-800 mb-1.5">
+                  해당 주제의 질문이 없어요
+                </p>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  직장생활의 고민을 AI에게 물어보세요
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      <BottomComposer
-        onSubmit={handleNewQuestion}
-        prefillContent={prefillContent}
-        onClearPrefill={onClearPrefill}
-        onOpenAttachment={setOpenAttachment}
-      />
+      {!showArchive && (
+        <BottomComposer
+          onSubmit={handleNewQuestion}
+          prefillContent={prefillContent}
+          onClearPrefill={onClearPrefill}
+          onOpenAttachment={setOpenAttachment}
+        />
+      )}
       <AttachmentModal
         attachment={openAttachment}
         onClose={() => setOpenAttachment(null)}
