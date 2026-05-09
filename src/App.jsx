@@ -4,10 +4,12 @@ import HomeScreen from './components/screens/HomeScreen'
 import ContentScreen from './components/screens/ContentScreen'
 import CommunityScreen from './components/screens/CommunityScreen'
 import MyPageScreen from './components/screens/MyPageScreen'
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 
-export default function App() {
+function AppScreens() {
   const [activeTab, setActiveTab] = useState('home')
   const [prefillContent, setPrefillContent] = useState(null)
+  const { lang } = useLanguage()
 
   const handleAskAI = (content) => {
     setPrefillContent(content)
@@ -19,14 +21,15 @@ export default function App() {
       case 'home':
         return (
           <HomeScreen
+            key={lang}
             prefillContent={prefillContent}
             onClearPrefill={() => setPrefillContent(null)}
           />
         )
       case 'content':
-        return <ContentScreen onAskAI={handleAskAI} />
+        return <ContentScreen key={lang} onAskAI={handleAskAI} />
       case 'community':
-        return <CommunityScreen onAskAI={handleAskAI} />
+        return <CommunityScreen key={lang} onAskAI={handleAskAI} />
       case 'mypage':
         return <MyPageScreen />
     }
@@ -35,11 +38,22 @@ export default function App() {
   return (
     <div className="flex justify-center bg-gray-100 min-h-screen">
       <div className="relative w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
-        <main className="flex-1 min-h-0 overflow-y-auto pb-16">
+        <main
+          className="flex-1 min-h-0 overflow-y-auto pb-16"
+          style={lang === 'en' ? { letterSpacing: '0.012em' } : undefined}
+        >
           {renderScreen()}
         </main>
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppScreens />
+    </LanguageProvider>
   )
 }
