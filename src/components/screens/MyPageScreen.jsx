@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import { translations } from '../../data/translations'
 
 export default function MyPageScreen() {
-  const { lang, setLang } = useLanguage()
+  const { lang, setLang, nickname } = useLanguage()
   const t = translations[lang].myPage
   const lt = translations[lang].langModal
   const [showLangModal, setShowLangModal] = useState(false)
@@ -29,7 +29,8 @@ export default function MyPageScreen() {
       {/* Profile */}
       <div className="mx-5 bg-gray-50 rounded-2xl p-4 flex items-center justify-between mb-5">
         <div>
-          <p className="text-base font-bold text-gray-900">{t.profile.role}</p>
+          <p className="text-lg font-extrabold text-gray-900">{nickname}</p>
+          <p className="text-base font-bold text-gray-500 mt-0.5">{t.profile.role}</p>
           <p className="text-sm text-gray-400 mt-0.5">lily_choi7@snu.ac.kr</p>
         </div>
         <button className="text-xs font-medium text-brand-blue bg-brand-blue-light px-3 py-1.5 rounded-full">

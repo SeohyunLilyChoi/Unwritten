@@ -486,6 +486,33 @@ function EvidenceIcon({ type }) {
   );
 }
 
+function AnalysisSource({ body }) {
+  if (!body) return null;
+  const articleMatch  = body.match(/(\d+)\s+articles?/i) || body.match(/콘텐츠\s+(\d+)건/);
+  const communityMatch = body.match(/(\d+)\s+community\s+posts?/i) || body.match(/커뮤니티\s+(\d+)건/);
+  const articles  = articleMatch  ? parseInt(articleMatch[1])  : 0;
+  const community = communityMatch ? parseInt(communityMatch[1]) : 0;
+  if (!articles && !community) return null;
+  return (
+    <span className="flex items-center gap-1 text-[11px] text-gray-400 ml-auto shrink-0">
+      <span>based on</span>
+      {articles > 0 && (
+        <>
+          <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z" />
+            <path d="M13 4v6h6" />
+          </svg>
+          <span>{articles}</span>
+        </>
+      )}
+      <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span>{community}</span>
+    </span>
+  );
+}
+
 function AIAnswerBody({ aiAnswer, isLoading, job, years, onJobChange, onYearsChange, showDataCard }) {
   const { lang } = useLanguage();
   const t = translations[lang].home;
@@ -597,7 +624,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
 
         {/* AI Answer */}
         <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
-          <div className="flex justify-center pt-1 relative z-10">
+          <div className="flex justify-center pt-[5px] relative z-10">
             <div
               ref={previewMode || thread.isLoadingAnswer ? lastDotRef : null}
               className="w-2.5 h-2.5 rounded-full bg-brand-blue border-2 border-white shrink-0"
@@ -606,7 +633,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
           <div className={hasData || hasPosts ? "mb-7" : ""}>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[13px] font-bold text-brand-blue tracking-[0.04em] uppercase">{t.aiAnswer}</span>
-              {answered && <span className="text-xs text-gray-400 ml-auto">{thread.aiAnswer.body}</span>}
+              {answered && <AnalysisSource body={thread.aiAnswer.body} />}
             </div>
             <AIAnswerBody aiAnswer={thread.aiAnswer} isLoading={thread.isLoadingAnswer} job={job} years={years} onJobChange={onJobChange} onYearsChange={onYearsChange} showDataCard={false} />
           </div>
@@ -797,9 +824,12 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
 
   const handleKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } };
 
-  const composerBottom = keyboardHeight > 0 ? `${keyboardHeight}px` : "calc(64px + env(safe-area-inset-bottom, 0px))";
-  const suggestionsBottom = keyboardHeight > 0
-    ? `${keyboardHeight + composerHeight + 28}px`
+  const isDesktop = window.matchMedia?.('(pointer: fine)').matches ?? false;
+  const effectiveKeyboardHeight = keyboardHeight > 0 ? keyboardHeight : (isFocused && isDesktop ? 280 : 0);
+
+  const composerBottom = effectiveKeyboardHeight > 0 ? `${effectiveKeyboardHeight}px` : "calc(64px + env(safe-area-inset-bottom, 0px))";
+  const suggestionsBottom = effectiveKeyboardHeight > 0
+    ? `${effectiveKeyboardHeight + composerHeight + 28}px`
     : `calc(64px + env(safe-area-inset-bottom, 0px) + ${composerHeight + 28}px)`;
 
   return (
@@ -822,13 +852,17 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
             style={{ bottom: suggestionsBottom, transition: "bottom 0.25s ease" }}
           >
             <div className="flex flex-col items-start gap-2">
-              <p className="mb-1 text-[16px] font-extrabold text-gray-900">{suggestedLabel}</p>
+              <p className="mb-1 text-[28px] font-extrabold text-white leading-snug">
+  <span style={{ background: "rgba(11,14,20,0.38)", padding: "2px 8px", boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" }}>
+    {suggestedLabel}
+  </span>
+</p>
               {suggestedQuestions.map((question) => (
                 <button
                   key={question} type="button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => handleSuggestionClick(question)}
-                  className="w-2/3 rounded-xl border border-[#E1E6F2] bg-white px-3.5 py-3 text-left text-sm font-semibold leading-snug text-gray-700 shadow-sm transition-colors active:bg-brand-blue-light"
+                  className="w-4/5 rounded-xl border border-[#E1E6F2] bg-white px-3.5 py-3 text-left text-sm font-semibold leading-snug text-gray-700 shadow-sm transition-colors active:bg-brand-blue-light"
                 >
                   {question}
                 </button>
@@ -837,6 +871,13 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
           </motion.div>
         )}
       </AnimatePresence>
+
+      {effectiveKeyboardHeight > 0 && (
+        <div
+          className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white"
+          style={{ bottom: 0, height: effectiveKeyboardHeight, transition: "height 0.25s ease", zIndex: 29 }}
+        />
+      )}
 
       <motion.div
         ref={composerRef}
@@ -894,7 +935,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
 let nextId = 100;
 
 export default function HomeScreen({ prefillContent, onClearPrefill }) {
-  const { lang } = useLanguage();
+  const { lang, nickname } = useLanguage();
   const t = translations[lang].home;
   const MD = lang === "en" ? mockDataEn : mockDataKo;
   const CD = lang === "en" ? contentDataEn : contentDataKo;
@@ -1027,6 +1068,13 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
               <div className="w-[5px] h-[5px] rounded-full bg-brand-blue" />
             </div>
             <div className="flex items-center gap-1">
+              <button style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 30, padding: "0 10px", background: "#EEF2FF", borderRadius: 99, border: "none", cursor: "pointer" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" fill="var(--brand)" />
+                  <text x="12" y="16.5" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff" fontFamily="inherit">P</text>
+                </svg>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)" }}>1,240 P</span>
+              </button>
               <button onClick={() => setSearching((s) => !s)} className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${searching ? "text-brand-blue bg-brand-blue-light" : "text-gray-500 bg-white"}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
@@ -1063,7 +1111,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             >
               <div className="relative h-[282px] pt-3 pb-10 bg-white">
-                <p className="px-5 text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting}</p>
+                <p className="px-5 text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting(nickname)}</p>
                 <div className="mt-5 flex" style={{ transform: `translateX(-${summaryIndex * 100}%)`, transition: "transform .45s ease" }}>
                   <div className="min-w-full px-5">
                     <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
