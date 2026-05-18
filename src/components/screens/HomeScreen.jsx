@@ -13,6 +13,7 @@ import * as contentDataKo from "../../data/contentData";
 import * as contentDataEn from "../../data/contentDataEn";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { translations } from "../../data/translations";
+import keyboardImg from "../images/Keyboard - iPhone.png";
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -301,8 +302,12 @@ function FeedbackStrip({ feedback, onFeedback, threadId, followUps, onFollowUp, 
 function AttachmentPreview({ attachment, onRemove, onOpen, className = "" }) {
   const { lang } = useLanguage();
   const t = translations[lang].home;
-  if (!attachment || !["poll", "community"].includes(attachment.type)) return null;
-  const label = attachment.type === "poll" ? t.attachmentLabelPoll : t.attachmentLabelCommunity;
+  if (!attachment || !["poll", "community", "word"].includes(attachment.type)) return null;
+  const label = attachment.type === "poll"
+    ? t.attachmentLabelPoll
+    : attachment.type === "word"
+    ? t.attachmentLabelWord
+    : t.attachmentLabelCommunity;
 
   return (
     <button
@@ -335,6 +340,8 @@ function AttachmentModal({ attachment, onClose }) {
 
   const top = Math.max(...(attachment.options || []).map((o) => o.pct));
   const isPoll = attachment.type === "poll";
+  const isWord = attachment.type === "word";
+  const modalLabel = isPoll ? t.pollResultLabel : isWord ? t.wordDetailLabel : t.activeDiscussionLabel;
 
   return (
     <AnimatePresence>
@@ -354,7 +361,7 @@ function AttachmentModal({ attachment, onClose }) {
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <span className="inline-flex rounded-md bg-brand-blue-light px-2 py-1 text-[11px] font-bold text-brand-blue">
-                {isPoll ? t.pollResultLabel : t.activeDiscussionLabel}
+                {modalLabel}
               </span>
               <h3 className="mt-2 text-[15px] font-bold leading-snug text-gray-900">{attachment.title}</h3>
               {attachment.meta && <p className="mt-1 text-xs text-gray-400">{attachment.meta}</p>}
@@ -379,6 +386,10 @@ function AttachmentModal({ attachment, onClose }) {
                   </div>
                 );
               })}
+            </div>
+          ) : isWord ? (
+            <div>
+              {attachment.body && <p className="text-sm leading-relaxed text-gray-600">{attachment.body}</p>}
             </div>
           ) : (
             <div>
@@ -772,6 +783,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
   useEffect(() => {
     if (prefillContent) {
       if (typeof prefillContent === "string") { setText(prefillContent); setAttachment(null); }
+      else if (prefillContent.type === "word") { setText(prefillContent.prefillText || ""); setAttachment(prefillContent); }
       else if (["poll", "community"].includes(prefillContent.type)) { setText(""); setAttachment(prefillContent); }
       onClearPrefill();
       setTimeout(() => textareaRef.current?.focus(), 100);
@@ -820,6 +832,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
     setText("");
     setAttachment(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
+    textareaRef.current?.blur();
   };
 
   const handleKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } };
@@ -827,10 +840,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
   const isDesktop = window.matchMedia?.('(pointer: fine)').matches ?? false;
   const effectiveKeyboardHeight = keyboardHeight > 0 ? keyboardHeight : (isFocused && isDesktop ? 280 : 0);
 
-  const composerBottom = effectiveKeyboardHeight > 0 ? `${effectiveKeyboardHeight}px` : "calc(64px + env(safe-area-inset-bottom, 0px))";
-  const suggestionsBottom = effectiveKeyboardHeight > 0
-    ? `${effectiveKeyboardHeight + composerHeight + 28}px`
-    : `calc(64px + env(safe-area-inset-bottom, 0px) + ${composerHeight + 28}px)`;
+  const suggestionsBottom = `calc(${effectiveKeyboardHeight + composerHeight + 28}px + 64px + env(safe-area-inset-bottom, 0px))`;
 
   return (
     <>
@@ -872,61 +882,63 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
         )}
       </AnimatePresence>
 
-      {effectiveKeyboardHeight > 0 && (
-        <div
-          className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white"
-          style={{ bottom: 0, height: effectiveKeyboardHeight, transition: "height 0.25s ease", zIndex: 29 }}
-        />
-      )}
-
-      <motion.div
-        ref={composerRef}
-        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-white px-4"
-        style={{ bottom: composerBottom, transition: "bottom 0.25s ease" }}
-        animate={isFocused
-          ? { borderRadius: "20px 20px 0 0", paddingTop: 12, paddingBottom: 20, boxShadow: "0 -8px 32px rgba(11,14,20,.12)" }
-          : { borderRadius: "0px", paddingTop: 10, paddingBottom: 10, boxShadow: "0 -1px 0 #F3F4F6" }}
-        transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px]"
+        style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))", zIndex: 29 }}
       >
-        {isFocused && <div style={{ width: 36, height: 4, background: "#E2E8F0", borderRadius: 99, margin: "0 auto 14px" }} />}
+        <motion.div
+          ref={composerRef}
+          className="w-full bg-white px-4"
+          animate={isFocused
+            ? { borderRadius: "20px 20px 0 0", paddingTop: 12, paddingBottom: 20, boxShadow: "0 -8px 32px rgba(11,14,20,.12)" }
+            : { borderRadius: "0px", paddingTop: 10, paddingBottom: 10, boxShadow: "0 -1px 0 #F3F4F6" }}
+          transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+        >
+          {isFocused && <div style={{ width: 36, height: 4, background: "#E2E8F0", borderRadius: 99, margin: "0 auto 14px" }} />}
 
-        {["poll", "community"].includes(attachment?.type) && (
-          <AttachmentPreview attachment={attachment} onRemove={() => setAttachment(null)} onOpen={onOpenAttachment} className="mb-2" />
-        )}
-        <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
-          <div className="relative flex-1">
-            {!text && (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={placeholderText}
-                  className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
-                  initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -8, opacity: 0 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                >
-                  {placeholderText}
-                </motion.div>
-              </AnimatePresence>
-            )}
-            <textarea
-              ref={textareaRef} value={text} onChange={handleChange} onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
-              placeholder="" rows={1}
-              className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
-              style={{ minHeight: 20, maxHeight: 100 }}
-            />
+          {["poll", "community", "word"].includes(attachment?.type) && (
+            <AttachmentPreview attachment={attachment} onRemove={() => setAttachment(null)} onOpen={onOpenAttachment} className="mb-2" />
+          )}
+          <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
+            <div className="relative flex-1">
+              {!text && (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={placeholderText}
+                    className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
+                    initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -8, opacity: 0 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                  >
+                    {placeholderText}
+                  </motion.div>
+                </AnimatePresence>
+              )}
+              <textarea
+                ref={textareaRef} value={text} onChange={handleChange} onKeyDown={handleKeyDown}
+                onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
+                placeholder="" rows={1}
+                className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
+                style={{ minHeight: 20, maxHeight: 100 }}
+              />
+            </div>
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleSubmit} disabled={!text.trim() && !attachment}
+              className={`shrink-0 w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
+                text.trim() || attachment ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-300"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={handleSubmit} disabled={!text.trim() && !attachment}
-            className={`shrink-0 w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${
-              text.trim() || attachment ? "bg-brand-blue text-white" : "bg-gray-100 text-gray-300"
-            }`}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
-          </button>
+        </motion.div>
+
+        <div style={{ height: effectiveKeyboardHeight, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+          <img src={keyboardImg} alt="" className="w-full h-full object-cover object-top" />
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
@@ -953,6 +965,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const [years, setYears] = useState(MD.me.years);
   const [openAttachment, setOpenAttachment] = useState(null);
   const feedRef = useRef(null);
+  const isFirstQuestion = useRef(true);
 
   const visibleThreads = selectedCategory === "all"
     ? threads
@@ -982,11 +995,12 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
     });
   }, []);
 
-  useEffect(() => {
-    if (!showQuestionSummary) return undefined;
-    const timer = setInterval(() => setSummaryIndex((index) => (index + 1) % 3), 3600);
-    return () => clearInterval(timer);
-  }, [showQuestionSummary]);
+  // ANIMATION PAUSED FOR FIGMA CAPTURE
+  // useEffect(() => {
+  //   if (!showQuestionSummary) return undefined;
+  //   const timer = setInterval(() => setSummaryIndex((index) => (index + 1) % 3), 3600);
+  //   return () => clearInterval(timer);
+  // }, [showQuestionSummary]);
 
   const handleToggle = useCallback((id) => setOpenId((prev) => (prev === id ? null : id)), []);
 
@@ -1032,7 +1046,10 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
     requestAnimationFrame(() => { if (feedRef.current) feedRef.current.scrollTop = 0; });
 
     await delay(800);
-    const title = MD.MOCK_NEW_TITLES[Math.floor(Math.random() * MD.MOCK_NEW_TITLES.length)];
+    const title = isFirstQuestion.current
+      ? MD.MOCK_NEW_TITLES[0]
+      : MD.MOCK_NEW_TITLES[Math.floor(Math.random() * MD.MOCK_NEW_TITLES.length)];
+    isFirstQuestion.current = false;
     setThreads((prev) => prev.map((thread) => thread.id === id ? { ...thread, title, isLoadingTitle: false } : thread));
 
     await delay(600);

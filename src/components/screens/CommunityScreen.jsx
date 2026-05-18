@@ -398,34 +398,30 @@ function OpinionChat({ opinionCards }) {
   const { lang } = useLanguage();
   const t = translations[lang].community;
   const [setIdx, setSetIdx] = useState(0);
-  const [msgCount, setMsgCount] = useState(0);
+  // ANIMATION PAUSED FOR FIGMA CAPTURE — show all 3 messages immediately
+  const [msgCount, setMsgCount] = useState(3);
 
-  useEffect(() => {
-    const timers = [];
-    let si = 0;
-    let mc = 0;
-
-    const step = () => {
-      if (mc < 3) {
-        mc++;
-        setMsgCount(mc);
-        timers.push(setTimeout(step, 1300));
-      } else {
-        timers.push(
-          setTimeout(() => {
-            setMsgCount(0);
-            mc = 0;
-            si = (si + 1) % opinionCards.length;
-            setSetIdx(si);
-            timers.push(setTimeout(step, 700));
-          }, 3200),
-        );
-      }
-    };
-
-    timers.push(setTimeout(step, 600));
-    return () => timers.forEach(clearTimeout);
-  }, []);
+  // useEffect(() => {
+  //   const timers = [];
+  //   let si = 0;
+  //   let mc = 0;
+  //   const step = () => {
+  //     if (mc < 3) {
+  //       mc++;
+  //       setMsgCount(mc);
+  //       timers.push(setTimeout(step, 1300));
+  //     } else {
+  //       timers.push(setTimeout(() => {
+  //         setMsgCount(0); mc = 0;
+  //         si = (si + 1) % opinionCards.length;
+  //         setSetIdx(si);
+  //         timers.push(setTimeout(step, 700));
+  //       }, 3200));
+  //     }
+  //   };
+  //   timers.push(setTimeout(step, 600));
+  //   return () => timers.forEach(clearTimeout);
+  // }, []);
 
   const card = opinionCards[setIdx];
   const allMsgs = [

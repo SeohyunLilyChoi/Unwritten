@@ -7,7 +7,8 @@ import MyPageScreen from './components/screens/MyPageScreen'
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 
 function AppScreens() {
-  const [activeTab, setActiveTab] = useState('home')
+  const initTab = new URLSearchParams(location.hash.slice(1)).get('tab') || 'home'
+  const [activeTab, setActiveTab] = useState(initTab)
   const [prefillContent, setPrefillContent] = useState(null)
   const { lang } = useLanguage()
 

@@ -177,26 +177,26 @@ export const MOCK_NEW_TITLES = [
 ]
 
 export const MOCK_NEW_ANSWER = {
-  headline: 'This is definitely worth talking about.',
-  highlight: "More people share this concern than you'd think.",
-  body: 'Analyzed 10 articles · 156 community posts.',
-  dataSummary: "More than half said they've had the same concern.",
-  communitySummary: 'Many found it helpful to look at how others handled similar situations.',
+  headline: "You can say no — but how you say it matters.",
+  highlight: "Framing it as a capacity issue works better than a flat refusal.",
+  body: 'Analyzed 9 articles · 142 community posts.',
+  dataSummary: "Over 60% of junior employees have declined overtime at least once in their first 1–3 years.",
+  communitySummary: "Many say giving advance notice and offering an alternative — like finishing first thing in the morning — makes it much easier.",
   dataCard: {
-    title: "Workers Who've Had the Same Concern",
+    title: "Employees Who've Declined Overtime",
     matrix: {
-      'all':       { '1-3': 71, '4-6': 58, '7-10': 44, 'overall': 62, 'n': 198 },
-      'marketing': { '1-3': 74, '4-6': 61, '7-10': 47, 'overall': 64, 'n': 36 },
-      'dev':       { '1-3': 68, '4-6': 55, '7-10': 41, 'overall': 59, 'n': 48 },
-      'plan':      { '1-3': 72, '4-6': 59, '7-10': 45, 'overall': 62, 'n': 31 },
-      'design':    { '1-3': 75, '4-6': 62, '7-10': 48, 'overall': 65, 'n': 27 },
-      'sales':     { '1-3': 69, '4-6': 56, '7-10': 42, 'overall': 60, 'n': 33 },
-      'hr':        { '1-3': 73, '4-6': 60, '7-10': 46, 'overall': 63, 'n': 23 },
+      'all':       { '1-3': 63, '4-6': 71, '7-10': 78, 'overall': 69, 'n': 214 },
+      'marketing': { '1-3': 61, '4-6': 69, '7-10': 76, 'overall': 67, 'n': 39 },
+      'dev':       { '1-3': 68, '4-6': 75, '7-10': 82, 'overall': 73, 'n': 52 },
+      'plan':      { '1-3': 59, '4-6': 67, '7-10': 74, 'overall': 65, 'n': 33 },
+      'design':    { '1-3': 65, '4-6': 73, '7-10': 79, 'overall': 70, 'n': 28 },
+      'sales':     { '1-3': 54, '4-6': 62, '7-10': 70, 'overall': 61, 'n': 35 },
+      'hr':        { '1-3': 60, '4-6': 68, '7-10': 75, 'overall': 66, 'n': 27 },
     },
   },
   communityPosts: [
-    { id: 101, title: 'I had the same worry', preview: "I struggled to bring it up at first, but being honest worked out better than I expected...", role: 'Planning · 2 yrs', comments: 14, likes: 29 },
-    { id: 102, title: 'Let me share my experience', preview: "I went through something similar — talking directly was the best solution. Here's how I handled it...", role: 'Marketing · 5 yrs', comments: 22, likes: 38 },
+    { id: 101, title: 'I said no to overtime for the first time', preview: "I told my manager I had a prior commitment. They were fine with it — giving a heads-up early was the key.", role: 'Marketing · 2 yrs', comments: 18, likes: 41 },
+    { id: 102, title: 'Is refusing overtime actually okay?', preview: "Depends on your team, but flagging it early and showing you're on top of your workload goes a long way.", role: 'Dev · 4 yrs', comments: 27, likes: 55 },
   ],
 }
 

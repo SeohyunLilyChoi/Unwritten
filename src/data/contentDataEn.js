@@ -23,7 +23,7 @@ export const CONTENT_POLLS = [
     audience: '#NewHire', nParticipants: 2147, daysLeft: 3,
     options: [
       { label: 'Right on time (±5 min)', pct: 38, self: false },
-      { label: '10 minutes early',        pct: 41, self: true  },
+      { label: '10 minutes early',        pct: 41, self: false },
       { label: '20+ minutes early',       pct: 21, self: false },
     ],
   },

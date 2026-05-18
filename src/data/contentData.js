@@ -23,7 +23,7 @@ export const CONTENT_POLLS = [
     audience: '#신입 사원', nParticipants: 2147, daysLeft: 3,
     options: [
       { label: '칼출근 (정시±5분)', pct: 38, self: false },
-      { label: '10분 전 도착',       pct: 41, self: true  },
+      { label: '10분 전 도착',       pct: 41, self: false },
       { label: '20분 이상 여유있게', pct: 21, self: false },
     ],
   },

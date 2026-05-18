@@ -1061,6 +1061,9 @@ function WordCard({ word, onAskAI, onNext, onEarnPoint }) {
                   type: "word",
                   title: word.word,
                   body: word.explanation,
+                  prefillText: lang === 'en'
+                    ? `Tell me more about "${word.word}"`
+                    : `"${word.word}"에 대해 더 알려줘`,
                 })
               }
               style={{
@@ -1221,13 +1224,14 @@ function PersonalizedCard({ onAskAI }) {
     ko: { poll: "투표", article: "아티클", tip: "팁" },
   };
 
-  useEffect(() => {
-    const timer = setInterval(
-      () => setRecIndex((i) => (i + 1) % recs.length),
-      3200,
-    );
-    return () => clearInterval(timer);
-  }, [recs.length]);
+  // ANIMATION PAUSED FOR FIGMA CAPTURE
+  // useEffect(() => {
+  //   const timer = setInterval(
+  //     () => setRecIndex((i) => (i + 1) % recs.length),
+  //     3200,
+  //   );
+  //   return () => clearInterval(timer);
+  // }, [recs.length]);
 
   return (
     <section style={{ position: "relative", overflow: "hidden" }}>
