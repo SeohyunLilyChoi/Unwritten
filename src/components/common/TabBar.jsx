@@ -52,7 +52,9 @@ export default function TabBar({ activeTab, onTabChange }) {
   const TABS = makeTabs(translations[lang].tabs)
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-100 safe-bottom z-50">
+    <nav className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white safe-bottom z-50 ${
+      activeTab === 'home' ? 'border-t border-[#E8ECF5]' : 'shadow-[0_-1px_6px_rgba(11,14,20,0.05)]'
+    }`}>
       <div className="flex">
         {TABS.map(({ key, label, icon }) => {
           const active = activeTab === key

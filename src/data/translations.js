@@ -1,6 +1,6 @@
 export const translations = {
   en: {
-    tabs: { home: 'Ask', content: 'Content', community: 'Community', mypage: 'My Page' },
+    tabs: { home: 'Ask', content: 'Content', community: 'Community', mypage: 'Profile' },
 
     myPage: {
       title: 'My Page',
@@ -21,12 +21,7 @@ export const translations = {
     langModal: { title: 'Language Settings', en: 'English', ko: '한국어' },
 
     home: {
-      composerPlaceholders: [
-        'What time should I arrive at work?',
-        'Is it okay to eat lunch alone?',
-        'I just want to leave early',
-      ],
-      composerFocused: "What's on your mind today?",
+      composerPlaceholder: 'How can I help you?',
       suggestedLabel: 'Your fellow 2nd-year marketers are wondering...',
       suggestedQuestions: [
         'How early should I arrive to seem natural?',
@@ -44,7 +39,7 @@ export const translations = {
       hotSlideCommunity: 'Community',
       activeDiscussion: 'Active discussions among 2nd-year marketing users',
       myQuestion: 'My Question',
-      aiAnswer: 'Solution',
+      aiAnswer: 'AI Solution',
       seeMoreData: 'See More Data',
       relatedPosts: 'Related Community Posts',
       viewAll: 'View All',
@@ -101,6 +96,7 @@ export const translations = {
       trendingTitle: '🔥 Trending Topics',
       favBoards: 'Favorite Boards',
       mergedLabel: (n) => `${n.toLocaleString()} questions merged`,
+      answersMergedLabel: (n) => `${n.toLocaleString()} answers merged`,
       askAI: 'Ask AI',
       viewDetail: 'View Detail',
       communityOpinions: 'Live Community Opinions',
@@ -120,7 +116,7 @@ export const translations = {
   },
 
   ko: {
-    tabs: { home: '질문', content: '콘텐츠', community: '커뮤니티', mypage: '마이페이지' },
+    tabs: { home: '질문', content: '콘텐츠', community: '커뮤니티', mypage: '프로필' },
 
     myPage: {
       title: '마이페이지',
@@ -141,12 +137,7 @@ export const translations = {
     langModal: { title: '언어 설정', en: 'English', ko: '한국어' },
 
     home: {
-      composerPlaceholders: [
-        '출근 몇시까지 해야할까?',
-        '점심 혼자 먹어도 될까?',
-        '퇴근하고 싶어',
-      ],
-      composerFocused: '오늘의 고민은 무엇인가요?',
+      composerPlaceholder: '무엇을 도와드릴까요?',
       suggestedLabel: '지금 2년차 마케팅 동료들이 궁금해해요',
       suggestedQuestions: [
         '출근 몇 시까지 가야 자연스러울까?',
@@ -221,6 +212,7 @@ export const translations = {
       trendingTitle: '🔥 지금 뜨는 주제',
       favBoards: '즐겨보는 게시판',
       mergedLabel: (n) => `${n.toLocaleString()}개 질문 병합`,
+      answersMergedLabel: (n) => `${n.toLocaleString()}개 답변 병합`,
       askAI: 'AI에게 물어보기',
       viewDetail: '자세히 보기',
       communityOpinions: '커뮤니티의 생생한 의견',

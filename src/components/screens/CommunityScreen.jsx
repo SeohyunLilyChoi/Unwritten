@@ -20,11 +20,13 @@ const CM_THREADS_KO = [
   {
     id: "th-1",
     merged: 1248,
+    answersMerged: 4128,
     tag: "#휴가",
+    tags: ["#휴가", "#연차사유", "#회사문화"],
     hot: true,
     question: "연차 상신할 때 사유, 뭐라고 적는 게 베스트인가요?",
     aiSummary:
-      '대부분의 기업에서는 "개인 사유" 또는 "개인 용무"로 기재하는 것이 표준입니다. 구체적인 사유를 묻는 것은 점차 지양되는 추세이나, 보수적인 조직이라면 "은행 업무", "병원 진료" 등 포괄적인 목적을 적는 것을 추천합니다.',
+      '대부분 "개인 사유"로 적으면 충분하지만, 보수적인 조직이라면 "은행 업무" 등 포괄적인 사유가 더 안전합니다.',
     aiTags: ["#개인사유 압도적", "#회사 문화 따라다름", "#신입일수록 눈치"],
     opinionCards: [
       {
@@ -213,11 +215,13 @@ const CM_THREADS_EN = [
   {
     id: "th-1",
     merged: 1248,
+    answersMerged: 4128,
     tag: "#TimeOff",
+    tags: ["#TimeOff", "#LeaveRequest", "#WorkCulture"],
     hot: true,
     question: "What should I write for the reason when submitting a leave request?",
     aiSummary:
-      'At most companies, writing "personal reason" or "personal errand" is the standard. Asking for specific reasons is becoming less common, but in conservative organizations it\'s safer to write a general purpose like "medical appointment" or "bank errand".',
+      '"Personal reason" is usually enough, but in conservative orgs a general purpose like "bank errand" is safer.',
     aiTags: ["#PersonalReason wins", "#DependsOnCulture", "#NewHires feel the pressure"],
     opinionCards: [
       {
@@ -472,6 +476,100 @@ function OpinionChat({ opinionCards }) {
   );
 }
 
+// ─── Avatars (merged posters) ─────────────────────────────────────────────────
+function Avatars({ variant }) {
+  const colors = variant === "a"
+    ? ["#2DD4BF", "#22D3EE", "#38BDF8"]
+    : ["#4F6EFF", "#7B8FFF", "#8B72FF"];
+  return (
+    <div style={{ display: "inline-flex", flexShrink: 0 }}>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: 18, height: 18, borderRadius: 99, border: "1.5px solid #fff",
+            background: colors[i],
+            marginLeft: i === 0 ? 0 : -6,
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <img src={faceImg} alt="" style={{ width: "65%", height: "65%", objectFit: "contain" }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Q/A badge ────────────────────────────────────────────────────────────────
+function QABadge({ letter, variant }) {
+  const isQ = variant === "q";
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        flexShrink: 0, width: 22, height: 22, borderRadius: 7, marginTop: 1,
+        fontSize: 12, fontWeight: 800, lineHeight: 1,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        background: isQ ? "rgba(59,91,255,.10)" : "var(--brand)",
+        color: isQ ? "var(--brand)" : "#fff",
+      }}
+    >
+      {letter}
+    </span>
+  );
+}
+
+// ─── Q/A summary block (shared by card + detail) ──────────────────────────────
+function QASummary({ th, summaryHeadlines }) {
+  const { lang } = useLanguage();
+  const t = translations[lang].community;
+  return (
+    <>
+      {/* tags */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+        {th.tags.map((tag) => (
+          <span key={tag} style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-2)", background: "#fff", border: "1px solid var(--line)", padding: "5px 11px", borderRadius: 99 }}>
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Questions merged → Q */}
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+        <Avatars variant="q" />
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--brand)" }}>
+          {t.mergedLabel(th.merged)}
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 9, alignItems: "flex-start", marginBottom: 16 }}>
+        <QABadge letter="Q" variant="q" />
+        <div style={{ flex: 1, fontSize: 15.5, fontWeight: 700, letterSpacing: "-.025em", lineHeight: 1.35, color: "var(--ink)", textAlign: "left" }}>
+          {th.question}
+        </div>
+      </div>
+
+      {/* Answers merged → A */}
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+        <Avatars variant="a" />
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--brand)" }}>
+          {t.answersMergedLabel(th.answersMerged)}
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+        <QABadge letter="A" variant="a" />
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, letterSpacing: "-.025em", lineHeight: 1.35, color: "var(--ink)" }}>
+            {summaryHeadlines[th.id]}
+          </p>
+          <p style={{ margin: "8px 0 0", fontSize: 14, color: "var(--ink-2)", lineHeight: 1.6 }}>
+            {th.aiSummary}
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Thread card ──────────────────────────────────────────────────────────────
 function ThreadCard({ thread: th, onAskAI, onOpenDetail, summaryHeadlines }) {
   const { lang } = useLanguage();
@@ -487,49 +585,11 @@ function ThreadCard({ thread: th, onAskAI, onOpenDetail, summaryHeadlines }) {
         overflow: "hidden",
       }}
     >
-      <div style={{ padding: "14px 14px 12px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-              <div style={{ display: "inline-flex", flexShrink: 0 }}>
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: 20, height: 20, borderRadius: 99, border: "1.5px solid #fff",
-                      background: ["#4F6EFF", "#7B8FFF", "#8B72FF"][i],
-                      marginLeft: i === 0 ? 0 : -6, fontSize: 8, color: "#fff", fontWeight: 700,
-                      display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    }}
-                  >
-                    <img src={faceImg} alt="" style={{ width: "65%", height: "65%", objectFit: "contain" }} />
-                  </div>
-                ))}
-              </div>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--brand)", whiteSpace: "nowrap" }}>
-                {t.mergedLabel(th.merged)}
-              </span>
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-2)", background: "#fff", border: "1px solid var(--line)", padding: "5px 11px", borderRadius: 99, flexShrink: 0 }}>
-              {th.tag}
-            </span>
-          </div>
-          <div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: "-.025em", lineHeight: 1.35, color: "var(--ink)", textAlign: "left" }}>
-            {th.question}
-          </div>
-        </div>
+      <div style={{ padding: "14px 14px 14px" }}>
+        <QASummary th={th} summaryHeadlines={summaryHeadlines} />
       </div>
 
       <>
-        <div style={{ margin: "0 14px 12px", background: "#fff", border: "1px solid var(--line-2)", borderRadius: 12, padding: "12px 12px 11px" }}>
-          <p style={{ display: "inline", margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: "-.025em", lineHeight: 1.35, color: "var(--ink)" }}>
-            {summaryHeadlines[th.id]}
-          </p>
-          <p style={{ margin: "9px 0 0", fontSize: 14, color: "var(--ink-2)", lineHeight: 1.6 }}>
-            {th.aiSummary}
-          </p>
-        </div>
-
         <div style={{ padding: "0 14px 4px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -916,13 +976,7 @@ export default function CommunityScreen({ onAskAI }) {
         ) : selectedDiscussion ? (
           <div style={{ background: "#fff" }}>
             <div style={{ padding: "18px 20px 16px", borderBottom: "7px solid #F3F5FA" }}>
-              <p style={{ margin: "0 0 8px", fontSize: 12.5, fontWeight: 800, color: "var(--brand)" }}>{t.summarizedQ}</p>
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 800, lineHeight: 1.38, letterSpacing: "-.025em", color: "var(--ink)" }}>
-                {selectedDiscussion.question}
-              </p>
-              <p style={{ margin: "10px 0 0", fontSize: 13.5, lineHeight: 1.6, color: "var(--muted)" }}>
-                {SUMMARY_HEADLINES[selectedDiscussion.id]}
-              </p>
+              <QASummary th={selectedDiscussion} summaryHeadlines={SUMMARY_HEADLINES} />
             </div>
             <div>
               {selectedDiscussion.opinionCards.map((card, index) => {
@@ -951,7 +1005,7 @@ export default function CommunityScreen({ onAskAI }) {
                     onClick={() => handlePostSelect(relatedPost)}
                     style={{ width: "100%", textAlign: "left", background: "#fff", border: "none", borderBottom: "1px solid var(--line-2)", borderRadius: 0, padding: "16px 20px 13px", cursor: "pointer", boxShadow: "none" }}
                   >
-                    <p style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{relatedPost.title}</p>
+                    <p style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{relatedPost.title}</p>
                     <p style={{ margin: "6px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{relatedPost.preview}</p>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
                       <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{relatedPost.uploadedAt} | {relatedPost.role}</span>

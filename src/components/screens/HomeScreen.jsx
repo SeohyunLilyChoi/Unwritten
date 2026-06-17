@@ -522,7 +522,7 @@ function AnalysisSource({ body }) {
   );
 }
 
-function AIAnswerBody({ aiAnswer, isLoading, job, years, onJobChange, onYearsChange, showDataCard }) {
+function AIAnswerBody({ aiAnswer, isLoading, job, years, onJobChange, onYearsChange, showDataCard, hideEvidence }) {
   const { lang } = useLanguage();
   const t = translations[lang].home;
 
@@ -543,7 +543,7 @@ function AIAnswerBody({ aiAnswer, isLoading, job, years, onJobChange, onYearsCha
     <div>
       <p className="text-[17px] font-bold text-gray-900 leading-snug">{aiAnswer.headline}</p>
       <p className="mt-1 text-[15px] font-medium text-gray-900 mb-1.5">{aiAnswer.highlight}</p>
-      {(aiAnswer.dataSummary || aiAnswer.communitySummary || aiAnswer.evidenceSummary) && (
+      {!hideEvidence && (aiAnswer.dataSummary || aiAnswer.communitySummary || aiAnswer.evidenceSummary) && (
         <div className="mt-4 space-y-1.5 text-sm text-gray-600 leading-relaxed">
           {aiAnswer.dataSummary && (
             <p className="flex items-start gap-2.5">
@@ -615,6 +615,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
         <div className="absolute bg-gray-200" style={{ left: 27, top: 40, height: lineHeight, width: 1 }} />
 
         {/* My Question */}
+        {!previewMode && (
         <div className="grid gap-3 mb-7" style={{ gridTemplateColumns: "20px 1fr" }}>
           <div className="flex justify-center pt-1 relative z-10">
             <div className="w-2.5 h-2.5 rounded-full bg-gray-900 border-2 border-white shrink-0" />
@@ -630,6 +631,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
             <p className="text-sm text-gray-700 leading-relaxed">{thread.question}</p>
           </div>
         </div>
+        )}
 
         {/* AI Answer */}
         <div className="grid gap-3" style={{ gridTemplateColumns: "20px 1fr" }}>
@@ -644,7 +646,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
               <span className="text-[13px] font-bold text-brand-blue tracking-[0.04em] uppercase">{t.aiAnswer}</span>
               {answered && <AnalysisSource body={thread.aiAnswer.body} />}
             </div>
-            <AIAnswerBody aiAnswer={thread.aiAnswer} isLoading={thread.isLoadingAnswer} job={job} years={years} onJobChange={onJobChange} onYearsChange={onYearsChange} showDataCard={false} />
+            <AIAnswerBody aiAnswer={thread.aiAnswer} isLoading={thread.isLoadingAnswer} job={job} years={years} onJobChange={onJobChange} onYearsChange={onYearsChange} showDataCard={false} hideEvidence={previewMode} />
           </div>
         </div>
 
@@ -731,10 +733,9 @@ function ThreadItem({ thread, isOpen, onToggle, onFeedback, onFollowUp, job, yea
 }
 
 // ─── BottomComposer ───────────────────────────────────────────────────────────
-function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttachment, composerPlaceholders, suggestedQuestions, composerFocused, suggestedLabel }) {
+function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttachment, composerPlaceholder, suggestedQuestions, suggestedLabel }) {
   const [text, setText] = useState("");
   const [attachment, setAttachment] = useState(null);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [composerHeight, setComposerHeight] = useState(74);
@@ -750,7 +751,6 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
     return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
   }, []);
 
-  const placeholderText = isFocused ? composerFocused : composerPlaceholders[placeholderIndex];
 
   useEffect(() => {
     if (prefillContent) {
@@ -761,12 +761,6 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
   }, [prefillContent]);
-
-  useEffect(() => {
-    if (isFocused) return undefined;
-    const timer = setInterval(() => setPlaceholderIndex((i) => (i + 1) % composerPlaceholders.length), 2600);
-    return () => clearInterval(timer);
-  }, [isFocused, composerPlaceholders]);
 
   useEffect(() => {
     const composer = composerRef.current;
@@ -856,14 +850,14 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
 
       <div
         className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px]"
-        style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))", zIndex: 29 }}
+        style={{ bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", zIndex: 29 }}
       >
         <motion.div
           ref={composerRef}
-          className="w-full bg-white px-4"
+          className="w-full bg-[#F5F7FF] px-4"
           animate={isFocused
             ? { borderRadius: "20px 20px 0 0", paddingTop: 12, paddingBottom: 20, boxShadow: "0 -8px 32px rgba(11,14,20,.12)" }
-            : { borderRadius: "0px", paddingTop: 10, paddingBottom: 10, boxShadow: "0 -1px 0 #F3F4F6" }}
+            : { borderRadius: "0px", paddingTop: 10, paddingBottom: 10, boxShadow: "0 -6px 20px rgba(11,14,20,.14)" }}
           transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
         >
           {isFocused && <div style={{ width: 36, height: 4, background: "#E2E8F0", borderRadius: 99, margin: "0 auto 14px" }} />}
@@ -871,25 +865,18 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
           {["poll", "community", "word"].includes(attachment?.type) && (
             <AttachmentPreview attachment={attachment} onRemove={() => setAttachment(null)} onOpen={onOpenAttachment} className="mb-2" />
           )}
-          <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-4 py-2">
+          <div className="flex items-center gap-2 bg-brand-blue-light rounded-2xl px-4 py-2 border-[1.5px] border-[#BCC9FF]">
             <div className="relative flex-1">
               {!text && (
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={placeholderText}
-                    className="pointer-events-none absolute left-0 top-0 text-sm leading-5 text-gray-400"
-                    initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -8, opacity: 0 }}
-                    transition={{ duration: 0.22, ease: "easeOut" }}
-                  >
-                    {placeholderText}
-                  </motion.div>
-                </AnimatePresence>
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center text-sm font-semibold leading-5 text-[#97AAF7]">
+                  {composerPlaceholder}
+                </div>
               )}
               <textarea
                 ref={textareaRef} value={text} onChange={handleChange} onKeyDown={handleKeyDown}
                 onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
                 placeholder="" rows={1}
-                className="relative z-10 w-full bg-transparent text-sm text-gray-800 outline-none resize-none leading-5"
+                className="relative z-10 w-full bg-transparent text-sm font-medium text-gray-800 outline-none resize-none leading-5"
                 style={{ minHeight: 20, maxHeight: 100 }}
               />
             </div>
@@ -927,7 +914,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
     MD.mockData.threads.map((thread) => ({ ...thread, followUps: [...(thread.followUps || [])] })),
   );
   const [openId, setOpenId] = useState(() => MD.mockData.threads[MD.mockData.threads.length - 1]?.id ?? null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searching, setSearching] = useState(false);
   const [showQuestionSummary, setShowQuestionSummary] = useState(true);
   const [summaryIndex, setSummaryIndex] = useState(0);
@@ -937,9 +923,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const feedRef = useRef(null);
   const isFirstQuestion = useRef(true);
 
-  const visibleThreads = selectedCategory === "all"
-    ? threads
-    : threads.filter((thread) => thread.category === selectedCategory);
+  const visibleThreads = threads;
 
   const keywordStats = useMemo(() => {
     const counts = threads.reduce((acc, thread) => {
@@ -973,13 +957,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   // }, [showQuestionSummary]);
 
   const handleToggle = useCallback((id) => setOpenId((prev) => (prev === id ? null : id)), []);
-
-  const handleCategorySelect = useCallback((categoryId) => {
-    setOpenId(categoryId === "all" ? (threads[0]?.id ?? null) : null);
-    setSelectedCategory(categoryId);
-    setShowQuestionSummary(true);
-    requestAnimationFrame(() => { if (feedRef.current) feedRef.current.scrollTop = 0; });
-  }, [threads]);
 
   const handleFeedScroll = useCallback(() => {
     const scrollTop = feedRef.current?.scrollTop ?? 0;
@@ -1066,19 +1043,20 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
 
             <motion.div
               className="overflow-hidden bg-white" initial={false}
-              animate={{ height: showQuestionSummary ? 282 : 0, opacity: showQuestionSummary ? 1 : 0 }}
+              animate={{ height: showQuestionSummary ? 270 : 0, opacity: showQuestionSummary ? 1 : 0 }}
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             >
-              <div className="relative h-[282px] pt-3 pb-10 bg-white">
-                <p className="px-5 text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting(nickname)}</p>
-                <div className="mt-5 flex" style={{ transform: `translateX(-${summaryIndex * 100}%)`, transition: "transform .45s ease" }}>
+              <div className="relative h-[270px] pt-3 bg-white">
+                <p className="relative z-10 px-5 text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting(nickname)}</p>
+                <div className="absolute inset-x-0 bottom-0 border-t border-[#EDF1F9] bg-[#F8FAFE]" style={{ top: 64 }} />
+                <div className="relative z-10 mt-10">
                   <div className="min-w-full px-5">
-                    <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
-                      {t.keywordSummaryLabel(topKeywordLabel)}
-                    </p>
-                    <div className="mt-3.5 rounded-[10px] border border-[#E1E6F2] bg-white px-3.5 py-3.5">
-                      <p className="mb-2.5 text-[13px] font-bold text-gray-400">{t.keywordTop3}</p>
-                      <div className="space-y-2">
+                    <div className="flex h-[158px] flex-col overflow-hidden rounded-2xl bg-white px-4 py-3.5 shadow-sm">
+                      <p className="text-[15px] font-extrabold leading-snug text-gray-900">
+                        {t.keywordSummaryLabel(topKeywordLabel)}
+                      </p>
+                      <p className="mt-0.5 mb-3 text-[12px] font-bold text-gray-400">{t.keywordTop3}</p>
+                      <div className="flex-1 space-y-2">
                         {keywordStats.map((item, index) => (
                           <div key={item.keyword} className="grid items-center gap-2.5" style={{ gridTemplateColumns: "116px 1fr" }}>
                             <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-gray-700">
@@ -1096,24 +1074,8 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-full px-5">
-                    <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">
-                      {t.hotContent(topKeywordLabel)}
-                    </p>
-                    <div className="mt-3.5 grid grid-cols-2 gap-2">
-                      {[t.hotSlideContent, t.hotSlideCommunity].map((label) => (
-                        <button key={label} type="button" className="h-[126px] rounded-[10px] bg-[#F3F5FB] px-2 text-sm font-bold text-gray-700 transition-colors active:bg-brand-blue-light">
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="min-w-full px-5">
-                    <p className="pl-1 text-[16px] font-extrabold leading-snug text-gray-900">{t.activeDiscussion}</p>
-                    <div className="mt-3.5 h-[126px] rounded-[10px] bg-[#F3F5FB]" />
-                  </div>
                 </div>
-                <div className="absolute bottom-6 left-5 flex gap-1.5">
+                <div className="absolute z-10 bottom-3 left-5 flex gap-1.5">
                   {[0, 1, 2].map((index) => (
                     <button
                       key={index} type="button" aria-label={`${index + 1}`}
@@ -1124,27 +1086,13 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                 </div>
               </div>
             </motion.div>
-
-            <div className="flex gap-2 px-5 pt-4 pb-3 overflow-x-auto border-b border-gray-100" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-              {MD.categoryChips.map((c) => (
-                <button
-                  key={c.id} onClick={() => handleCategorySelect(c.id)}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
-                    selectedCategory === c.id ? "bg-brand-blue text-white border-brand-blue" : "bg-white text-gray-700 border-gray-200"
-                  }`}
-                  style={{ minHeight: 34 }}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
       </div>
 
       {/* Thread feed */}
       <div
         ref={feedRef} onScroll={handleFeedScroll}
         className="flex-1 overflow-y-auto px-4 pt-4 pb-28"
-        style={{ background: "#F5F7FF" }}
+        style={{ background: "#FFFFFF" }}
       >
         <AnimatePresence mode="popLayout" initial={false}>
               {visibleThreads.map((thread) => (
@@ -1173,9 +1121,8 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
         prefillContent={prefillContent}
         onClearPrefill={onClearPrefill}
         onOpenAttachment={setOpenAttachment}
-        composerPlaceholders={t.composerPlaceholders}
+        composerPlaceholder={t.composerPlaceholder}
         suggestedQuestions={t.suggestedQuestions}
-        composerFocused={t.composerFocused}
         suggestedLabel={t.suggestedLabel}
       />
       <AttachmentModal attachment={openAttachment} onClose={() => setOpenAttachment(null)} />
