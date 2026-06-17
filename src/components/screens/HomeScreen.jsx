@@ -9,8 +9,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import * as mockDataKo from "../../data/mockData";
 import * as mockDataEn from "../../data/mockDataEn";
-import * as contentDataKo from "../../data/contentData";
-import * as contentDataEn from "../../data/contentDataEn";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { translations } from "../../data/translations";
 import keyboardImg from "../images/Keyboard - iPhone.png";
@@ -732,32 +730,6 @@ function ThreadItem({ thread, isOpen, onToggle, onFeedback, onFollowUp, job, yea
   );
 }
 
-function ArchiveArticleRow({ article, hero = false }) {
-  if (hero) {
-    return (
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
-        <div className="relative h-[148px]" style={{ background: article.cover }}>
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-[#8E4322]">{article.tag}</span>
-        </div>
-        <div className="px-3.5 py-3">
-          <p className="text-[15px] font-extrabold leading-snug text-gray-900">{article.title}</p>
-          <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-relaxed text-gray-500">{article.excerpt}</p>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-3">
-      <div className="h-[86px] w-[92px] shrink-0 rounded-xl" style={{ background: article.cover }} />
-      <div className="min-w-0 flex-1">
-        <div className="mb-1.5 text-xs font-bold text-[#8E4322]">{article.tag}</div>
-        <p className="line-clamp-2 text-[14px] font-extrabold leading-snug text-gray-900">{article.title}</p>
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-gray-500">{article.excerpt}</p>
-      </div>
-    </div>
-  );
-}
-
 // ─── BottomComposer ───────────────────────────────────────────────────────────
 function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttachment, composerPlaceholders, suggestedQuestions, composerFocused, suggestedLabel }) {
   const [text, setText] = useState("");
@@ -950,7 +922,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const { lang, nickname } = useLanguage();
   const t = translations[lang].home;
   const MD = lang === "en" ? mockDataEn : mockDataKo;
-  const CD = lang === "en" ? contentDataEn : contentDataKo;
 
   const [threads, setThreads] = useState(() =>
     MD.mockData.threads.map((thread) => ({ ...thread, followUps: [...(thread.followUps || [])] })),
@@ -958,7 +929,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const [openId, setOpenId] = useState(() => MD.mockData.threads[MD.mockData.threads.length - 1]?.id ?? null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searching, setSearching] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
   const [showQuestionSummary, setShowQuestionSummary] = useState(true);
   const [summaryIndex, setSummaryIndex] = useState(0);
   const [job, setJob] = useState(MD.me.job);
@@ -1012,10 +982,9 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
   }, [threads]);
 
   const handleFeedScroll = useCallback(() => {
-    if (showArchive) return;
     const scrollTop = feedRef.current?.scrollTop ?? 0;
     setShowQuestionSummary(scrollTop <= 2);
-  }, [showArchive]);
+  }, []);
 
   const handleFeedback = useCallback((threadId, type) => {
     setThreads((prev) => prev.map((thread) => (thread.id === threadId ? { ...thread, feedback: type } : thread)));
@@ -1060,26 +1029,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
     <div className="flex flex-col h-full">
       {/* Fixed header */}
       <div className="bg-white z-20 shrink-0">
-        {showArchive ? (
-          <div className="relative flex items-center justify-center px-5 pt-[14px] pb-[10px]">
-            <button
-              type="button" aria-label={t.archiveTitle}
-              onClick={() => setShowArchive(false)}
-              className="absolute left-5 top-[14px] w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-700 bg-white transition-colors active:bg-gray-50"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <h2 className="text-[17px] font-extrabold text-gray-900">{t.archiveTitle}</h2>
-            <button type="button" aria-label={t.archiveSearch} className="absolute right-5 top-[14px] w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-500 bg-white transition-colors active:bg-gray-50">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
-              </svg>
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between px-5 pt-[14px] pb-[10px]">
+        <div className="flex items-center justify-between px-5 pt-[14px] pb-[10px]">
             <div className="flex items-center gap-[6px]">
               <h1 className="text-[20px] font-extrabold text-gray-900" style={{ letterSpacing: "-0.03em" }}>unwritten</h1>
               <div className="w-[5px] h-[5px] rounded-full bg-brand-blue" />
@@ -1097,18 +1047,10 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                   <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
                 </svg>
               </button>
-              <button type="button" aria-label={t.archiveTitle} onClick={() => { setSearching(false); setShowArchive(true); }} className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-gray-500 bg-white transition-colors active:bg-gray-50">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-                </svg>
-              </button>
             </div>
           </div>
-        )}
 
-        {!showArchive && (
-          <>
-            <AnimatePresence>
+        <AnimatePresence>
               {searching && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                   <div className="mx-5 mb-2 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
@@ -1196,43 +1138,15 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                 </button>
               ))}
             </div>
-          </>
-        )}
-
-        {showArchive && (
-          <div className="flex gap-2 px-5 pt-4 pb-3 overflow-x-auto border-b border-gray-100" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            {MD.categoryChips.map((c) => (
-              <button
-                key={c.id} onClick={() => handleCategorySelect(c.id)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors duration-150 ${
-                  selectedCategory === c.id ? "bg-brand-blue text-white border-brand-blue" : "bg-white text-gray-700 border-gray-200"
-                }`}
-                style={{ minHeight: 34 }}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Thread feed */}
       <div
         ref={feedRef} onScroll={handleFeedScroll}
-        className={`flex-1 overflow-y-auto px-4 pt-4 ${showArchive ? "pb-4" : "pb-28"}`}
+        className="flex-1 overflow-y-auto px-4 pt-4 pb-28"
         style={{ background: "#F5F7FF" }}
       >
-        {showArchive ? (
-          <div className="pb-6">
-            <div className="flex flex-col gap-2.5">
-              {CD.CONTENT_ARTICLES.map((article, index) => (
-                <ArchiveArticleRow key={article.id} article={article} hero={index === 0} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
               {visibleThreads.map((thread) => (
                 <ThreadItem
                   key={thread.id} thread={thread} isOpen={openId === thread.id}
@@ -1251,23 +1165,19 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                 <p className="text-base font-bold text-gray-800 mb-1.5">{t.emptyTitle}</p>
                 <p className="text-sm text-gray-400 leading-relaxed">{t.emptyBody}</p>
               </div>
-            )}
-          </>
         )}
       </div>
 
-      {!showArchive && (
-        <BottomComposer
-          onSubmit={handleNewQuestion}
-          prefillContent={prefillContent}
-          onClearPrefill={onClearPrefill}
-          onOpenAttachment={setOpenAttachment}
-          composerPlaceholders={t.composerPlaceholders}
-          suggestedQuestions={t.suggestedQuestions}
-          composerFocused={t.composerFocused}
-          suggestedLabel={t.suggestedLabel}
-        />
-      )}
+      <BottomComposer
+        onSubmit={handleNewQuestion}
+        prefillContent={prefillContent}
+        onClearPrefill={onClearPrefill}
+        onOpenAttachment={setOpenAttachment}
+        composerPlaceholders={t.composerPlaceholders}
+        suggestedQuestions={t.suggestedQuestions}
+        composerFocused={t.composerFocused}
+        suggestedLabel={t.suggestedLabel}
+      />
       <AttachmentModal attachment={openAttachment} onClose={() => setOpenAttachment(null)} />
     </div>
   );
