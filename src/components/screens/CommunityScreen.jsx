@@ -500,6 +500,22 @@ function Avatars({ variant }) {
   );
 }
 
+// ─── Post author avatar (blue-family, varied per post) ────────────────────────
+function PostAvatar({ index }) {
+  const colors = ["#4F6EFF", "#6B84FF", "#3B9EFF", "#7B8FFF", "#5AA0FF"];
+  return (
+    <span
+      style={{
+        flexShrink: 0, width: 20, height: 20, borderRadius: 99,
+        background: colors[index % colors.length],
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+      }}
+    >
+      <img src={faceImg} alt="" style={{ width: "65%", height: "65%", objectFit: "contain" }} />
+    </span>
+  );
+}
+
 // ─── Q/A badge ────────────────────────────────────────────────────────────────
 function QABadge({ letter, variant }) {
   const isQ = variant === "q";
@@ -520,19 +536,21 @@ function QABadge({ letter, variant }) {
 }
 
 // ─── Q/A summary block (shared by card + detail) ──────────────────────────────
-function QASummary({ th, summaryHeadlines }) {
+function QASummary({ th, summaryHeadlines, showTags = true }) {
   const { lang } = useLanguage();
   const t = translations[lang].community;
   return (
     <>
       {/* tags */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-        {th.tags.map((tag) => (
-          <span key={tag} style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-2)", background: "#fff", border: "1px solid var(--line)", padding: "5px 11px", borderRadius: 99 }}>
-            {tag}
-          </span>
-        ))}
-      </div>
+      {showTags && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+          {th.tags.map((tag) => (
+            <span key={tag} style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-2)", background: "#fff", border: "1px solid var(--line)", padding: "5px 11px", borderRadius: 99 }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Questions merged → Q */}
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
@@ -976,7 +994,10 @@ export default function CommunityScreen({ onAskAI }) {
         ) : selectedDiscussion ? (
           <div style={{ background: "#fff" }}>
             <div style={{ padding: "18px 20px 16px", borderBottom: "7px solid #F3F5FA" }}>
-              <QASummary th={selectedDiscussion} summaryHeadlines={SUMMARY_HEADLINES} />
+              <QASummary th={selectedDiscussion} summaryHeadlines={SUMMARY_HEADLINES} showTags={false} />
+            </div>
+            <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--line)" }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--ink-2)" }}>{t.postsListTitle}</p>
             </div>
             <div>
               {selectedDiscussion.opinionCards.map((card, index) => {
@@ -1008,7 +1029,10 @@ export default function CommunityScreen({ onAskAI }) {
                     <p style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{relatedPost.title}</p>
                     <p style={{ margin: "6px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{relatedPost.preview}</p>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
-                      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{relatedPost.uploadedAt} | {relatedPost.role}</span>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                        <PostAvatar index={index} />
+                        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{relatedPost.uploadedAt} | {relatedPost.role}</span>
+                      </div>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" /></svg>
