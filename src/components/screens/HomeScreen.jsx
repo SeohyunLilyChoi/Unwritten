@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as mockDataKo from "../../data/mockData";
 import * as mockDataEn from "../../data/mockDataEn";
 import { useLanguage } from "../../contexts/LanguageContext";
+import faceImg from "../images/face.png";
 import { translations } from "../../data/translations";
 import keyboardImg from "../images/Keyboard - iPhone.png";
 
@@ -611,7 +612,7 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
 
   return (
     <div>
-      <div ref={timelineRef} className={`px-[18px] pt-4 relative ${previewMode ? "pb-5" : "pb-2"}`}>
+      <div ref={timelineRef} className={`px-[18px] pt-4 relative ${previewMode ? "pb-3" : "pb-2"}`}>
         <div className="absolute bg-gray-200" style={{ left: 27, top: 40, height: lineHeight, width: 1 }} />
 
         {/* My Question */}
@@ -702,17 +703,24 @@ function ThreadContent({ thread, onFeedback, onFollowUp, job, years, onJobChange
 // ─── ThreadItem ───────────────────────────────────────────────────────────────
 function ThreadItem({ thread, isOpen, onToggle, onFeedback, onFollowUp, job, years, onJobChange, onYearsChange, cardRef, onOpenAttachment }) {
   return (
-    <motion.div ref={cardRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: "easeOut" }} className="mb-3">
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}
+      className="mb-3 rounded-2xl"
+      style={{ boxShadow: "0 1px 3px rgba(11,14,20,.06)" }}
+    >
       <div
         onClick={onToggle}
-        className="rounded-2xl border border-gray-100 overflow-hidden transition-colors duration-200 cursor-pointer"
-        style={{ background: "#FFFFFF", boxShadow: "0 1px 3px rgba(11,14,20,.06)" }}
+        className={`rounded-2xl transition-colors duration-200 cursor-pointer ${isOpen ? "overflow-clip" : "border border-gray-100 overflow-hidden"}`}
+        style={{ background: "#FFFFFF" }}
       >
         <button
           onClick={(event) => { event.stopPropagation(); onToggle(); }}
-          className="w-full text-left px-[18px] py-4 flex items-center justify-between gap-3"
+          className={`relative w-full text-left px-[18px] py-4 flex items-center justify-between gap-3 ${isOpen ? "sticky top-0 z-30 bg-white" : ""}`}
           style={{ minHeight: 52 }}
         >
+          {/* Opaque square white fill (covers content bleeding behind rounded corners) + rounded border drawn on top */}
+          {isOpen && <span className="pointer-events-none absolute inset-0 rounded-t-2xl border border-gray-100" aria-hidden="true" />}
           <div className="flex-1 min-w-0">
             {thread.isLoadingTitle ? <Skeleton className="h-5 w-40" /> : (
               <p className="text-[17px] font-bold text-gray-900 leading-snug truncate">{thread.title}</p>
@@ -724,7 +732,7 @@ function ThreadItem({ thread, isOpen, onToggle, onFeedback, onFollowUp, job, yea
             </svg>
           </motion.div>
         </button>
-        <div className="border-t border-gray-100">
+        <div className={isOpen ? "border-x border-b border-gray-100 rounded-b-2xl" : "border-t border-gray-100"}>
           <ThreadContent thread={thread} onFeedback={onFeedback} onFollowUp={onFollowUp} job={job} years={years} onJobChange={onJobChange} onYearsChange={onYearsChange} onOpenAttachment={onOpenAttachment} previewMode={!isOpen} />
         </div>
       </div>
@@ -803,8 +811,10 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
 
   const handleKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } };
 
-  const isDesktop = window.matchMedia?.('(pointer: fine)').matches ?? false;
-  const effectiveKeyboardHeight = keyboardHeight > 0 ? keyboardHeight : (isFocused && isDesktop ? 280 : 0);
+  // Treat as mobile only when the primary pointer is a touch (coarse) device.
+  // Otherwise (desktop, incl. emulated frames) show the keyboard image on focus.
+  const isMobile = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const effectiveKeyboardHeight = keyboardHeight > 0 ? keyboardHeight : (isFocused && !isMobile ? 280 : 0);
 
   const suggestionsBottom = `calc(${effectiveKeyboardHeight + composerHeight + 28}px + 64px + env(safe-area-inset-bottom, 0px))`;
 
@@ -813,7 +823,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
       <AnimatePresence>
         {isFocused && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }}
-            className="fixed inset-0 z-20" style={{ background: "rgba(11,14,20,.25)" }}
+            className="fixed inset-0 z-40" style={{ background: "rgba(11,14,20,.25)" }}
             onMouseDown={() => textareaRef.current?.blur()}
           />
         )}
@@ -824,7 +834,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="fixed inset-x-0 z-30 mx-auto w-full max-w-[430px] px-4"
+            className="fixed inset-x-0 z-50 mx-auto w-full max-w-[430px] px-4"
             style={{ bottom: suggestionsBottom, transition: "bottom 0.25s ease" }}
           >
             <div className="flex flex-col items-start gap-2">
@@ -850,7 +860,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
 
       <div
         className="fixed left-1/2 -translate-x-1/2 w-full max-w-[430px]"
-        style={{ bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", zIndex: 29 }}
+        style={{ bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", zIndex: 45 }}
       >
         <motion.div
           ref={composerRef}
@@ -1043,19 +1053,45 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
 
             <motion.div
               className="overflow-hidden bg-white" initial={false}
-              animate={{ height: showQuestionSummary ? 270 : 0, opacity: showQuestionSummary ? 1 : 0 }}
+              animate={{ height: showQuestionSummary ? "auto" : 0, opacity: showQuestionSummary ? 1 : 0 }}
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             >
-              <div className="relative h-[270px] pt-3 bg-white">
-                <p className="relative z-10 px-5 text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting(nickname)}</p>
-                <div className="absolute inset-x-0 bottom-0 border-t border-[#EDF1F9] bg-[#F8FAFE]" style={{ top: 64 }} />
-                <div className="relative z-10 mt-10">
+              <div className="relative py-5 bg-[#F8FAFE]">
+                <div className="relative z-10 flex items-center gap-2.5 px-5">
+                  <span
+                    style={{
+                      flexShrink: 0, width: 28, height: 28, borderRadius: 99,
+                      background: "#4F6EFF",
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >
+                    <img src={faceImg} alt="" style={{ width: "65%", height: "65%", objectFit: "contain" }} />
+                  </span>
+                  <p className="text-[20px] font-extrabold leading-snug text-gray-900">{t.greeting(nickname)}</p>
+                </div>
+                <div className="relative z-10 mt-3">
                   <div className="min-w-full px-5">
-                    <div className="flex h-[158px] flex-col overflow-hidden rounded-2xl bg-white px-4 py-3.5 shadow-sm">
-                      <p className="text-[15px] font-extrabold leading-snug text-gray-900">
-                        {t.keywordSummaryLabel(topKeywordLabel)}
+                    <div className="flex flex-col">
+                      <p className="text-[16px] font-semibold leading-snug text-gray-900">
+                        {(() => {
+                          const label = t.keywordSummaryLabel(topKeywordLabel);
+                          const [before, ...after] = label.split(topKeywordLabel);
+                          return (
+                            <>
+                              {before}
+                              <span className="font-extrabold underline underline-offset-2">{topKeywordLabel}</span>
+                              {after.join(topKeywordLabel)}
+                            </>
+                          );
+                        })()}
                       </p>
-                      <p className="mt-0.5 mb-3 text-[12px] font-bold text-gray-400">{t.keywordTop3}</p>
+                      <div className="mt-4 border-t border-[#E8ECF5]" />
+                      <div className="mt-4 mb-3 flex items-center gap-1.5 text-[12px] font-bold text-brand-blue">
+                        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 20V10M12 20V4M20 20v-6" />
+                        </svg>
+                        <span>{t.keywordTop3}</span>
+                      </div>
                       <div className="flex-1 space-y-2">
                         {keywordStats.map((item, index) => (
                           <div key={item.keyword} className="grid items-center gap-2.5" style={{ gridTemplateColumns: "116px 1fr" }}>
@@ -1063,7 +1099,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                               <span className="shrink-0 text-gray-400">{index + 1}</span>
                               <span className="truncate">{item.keyword}</span>
                             </span>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-gray-100">
+                            <div className="h-2.5 mr-3 overflow-hidden rounded-full bg-gray-100">
                               <motion.div
                                 className={index === 0 ? "h-full rounded-full bg-brand-blue" : "h-full rounded-full bg-[#DCE3FF]"}
                                 initial={false} animate={{ width: item.width }} transition={{ duration: 0.28, ease: "easeOut" }}
@@ -1075,15 +1111,6 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                     </div>
                   </div>
                 </div>
-                <div className="absolute z-10 bottom-3 left-5 flex gap-1.5">
-                  {[0, 1, 2].map((index) => (
-                    <button
-                      key={index} type="button" aria-label={`${index + 1}`}
-                      onClick={() => setSummaryIndex(index)}
-                      className={`h-[5px] rounded-full transition-all ${summaryIndex === index ? "w-4 bg-brand-blue" : "w-[5px] bg-gray-300"}`}
-                    />
-                  ))}
-                </div>
               </div>
             </motion.div>
       </div>
@@ -1091,9 +1118,10 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
       {/* Thread feed */}
       <div
         ref={feedRef} onScroll={handleFeedScroll}
-        className="flex-1 overflow-y-auto px-4 pt-4 pb-28"
+        className="flex-1 min-h-0 overflow-y-auto px-4 pb-28"
         style={{ background: "#FFFFFF" }}
       >
+        <div className="pt-4">
         <AnimatePresence mode="popLayout" initial={false}>
               {visibleThreads.map((thread) => (
                 <ThreadItem
@@ -1114,6 +1142,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                 <p className="text-sm text-gray-400 leading-relaxed">{t.emptyBody}</p>
               </div>
         )}
+        </div>
       </div>
 
       <BottomComposer

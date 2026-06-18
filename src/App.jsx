@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TabBar from './components/common/TabBar'
 import HomeScreen from './components/screens/HomeScreen'
 import ContentScreen from './components/screens/ContentScreen'
@@ -11,6 +11,26 @@ function AppScreens() {
   const [activeTab, setActiveTab] = useState(initTab)
   const [prefillContent, setPrefillContent] = useState(null)
   const { lang } = useLanguage()
+
+  // Fixed device frame (390 x 844). Scale down to fit the viewport with a
+  // fixed top/bottom margin so the whole frame (incl. nav bar) is always visible.
+  const FRAME_W = 390
+  const FRAME_H = 844
+  const MARGIN = 24
+  const [scale, setScale] = useState(1)
+  useEffect(() => {
+    const update = () => {
+      const next = Math.min(
+        1,
+        (window.innerHeight - MARGIN * 2) / FRAME_H,
+        (window.innerWidth - MARGIN * 2) / FRAME_W,
+      )
+      setScale(next > 0 ? next : 1)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   const handleAskAI = (content) => {
     setPrefillContent(content)
@@ -37,8 +57,11 @@ function AppScreens() {
   }
 
   return (
-    <div className="flex justify-center bg-gray-100 min-h-screen">
-      <div className="relative w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
+    <div className="flex items-center justify-center bg-gray-100 h-screen overflow-hidden">
+      <div
+        className="relative w-[390px] h-[844px] bg-white flex flex-col shadow-xl overflow-hidden"
+        style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
+      >
         <main
           className="flex-1 min-h-0 overflow-y-auto pb-16"
           style={lang === 'en' ? { letterSpacing: '0.012em' } : undefined}

@@ -33,6 +33,14 @@ const CM_THREADS_KO = [
         post: { title: '연차 사유 "개인 사유"로 썼다가 반려된 적 있어요', body: "반기 초에 연차 상신했는데 팀장님이 좀 더 구체적으로 써달라고 하셨어요. 저만 겪는 건지 궁금합니다." },
         agree:    { role: "마케팅", year: "3년차", text: '보수적인 팀이라면 "병원 진료", "가족 행사" 같은 구체적 표현이 더 안전해요.' },
         disagree: { role: "개발",   year: "5년차", text: "그건 팀장 스타일 문제예요. 개인 사유도 엄연히 유효한 사유인데, 저는 한 번도 반려된 적 없어요." },
+        voices: [
+          { stance: "agree",    role: "마케팅", year: "3년차", text: '보수적인 팀이라면 "병원 진료", "가족 행사" 같은 구체적 표현이 더 안전해요.' },
+          { stance: "disagree", role: "개발",   year: "5년차", text: "그건 팀장 스타일 문제예요. 개인 사유도 엄연히 유효한 사유인데 저는 반려된 적 없어요." },
+          { stance: "agree",    role: "기획",   year: "3년차", text: "'개인 용무'라고 쓰면 제일 무난해요. 모호하지만 아무도 더 안 물어봐요." },
+          { stance: "disagree", role: "개발",   year: "2년차", text: "그 팀장님 좀 레드플래그 아닌가요? 어느 팀이 연차 사유를 그렇게 따지나요?" },
+          { stance: "agree",    role: "마케팅", year: "4년차", text: "입사 초에는 치과 가는 날도 '병원 진료'라고 썼어요. 그게 제일 무난하게 넘어가요." },
+          { stance: "disagree", role: "디자인", year: "5년차", text: "그냥 '개인 사유'라고 쓰고, 뭐라 하면 왜 충분하지 않은지 차분히 되물어보세요." },
+        ],
         detailedReplies: [
           { role: "마케팅 · 2년차", text: "저도 1년차 때 비슷한 일 있었어요. 팀장님이 너무 모호하다고 하셔서 결국 '병원 진료'라고 썼는데 병원이 아니었어요.", job: "마케팅", yearNum: 2, likes: 24, dislikes: 2 },
           { role: "개발 · 5년차",   text: "그건 팀장 문제예요. 개인 사유는 엄연히 유효한 사유예요. HR에 물어보면 지지해줄 거예요.", job: "개발", yearNum: 5, likes: 31, dislikes: 1 },
@@ -97,6 +105,9 @@ const CM_TRENDING_KO = [
 const CM_BOARDS_KO = [
   { name: '전체 게시판',        latest: '신입 팀장님 인사법' },
   { name: '직장생활 게시판',    latest: '회식 2차 자연스럽게 빠지기' },
+  { name: '연봉/이직 게시판',   latest: '연봉 협상 이메일 어떻게 쓰나요?' },
+  { name: '업무 스킬 게시판',   latest: '보고서 1장으로 줄이는 법' },
+  { name: '사내 정치 게시판',   latest: '팀장 라인 꼭 타야 하나요?' },
   { name: '취미/동호회 게시판', latest: '주말 러닝 크루 모집' },
   { name: '연애/결혼 게시판',   latest: '직장 동료랑 사귀어도 될까요' },
 ];
@@ -228,6 +239,14 @@ const CM_THREADS_EN = [
         post: { title: 'My leave was rejected for writing "personal reason"', body: "I submitted leave at the start of the half-year and my manager asked me to be more specific. I wonder if it's just me." },
         agree:    { role: "Marketing", year: "3 Yrs", text: '"Medical appointment" or "family event" is safer in conservative teams.' },
         disagree: { role: "Dev",       year: "5 Yrs", text: "That's the manager's style. Personal reason is valid — I've never had one rejected." },
+        voices: [
+          { stance: "agree",    role: "Marketing", year: "3 Yrs", text: '"Medical appointment" or "family event" is safer in conservative teams.' },
+          { stance: "disagree", role: "Dev",       year: "5 Yrs", text: "That's the manager's style. Personal reason is valid — I've never had one rejected." },
+          { stance: "agree",    role: "Planning",  year: "3 Yrs", text: "I always write 'personal errand' now. Vague enough to stay private, specific enough that no one pushes back." },
+          { stance: "disagree", role: "Dev",       year: "2 Yrs", text: "Honestly your manager sounds like a red flag. What team interrogates leave reasons?" },
+          { stance: "agree",    role: "Marketing", year: "4 Yrs", text: "In my first two years I wrote 'hospital visit' for everything — including the dentist." },
+          { stance: "disagree", role: "Design",    year: "5 Yrs", text: "Write 'personal reason', and if they push back, calmly ask why that isn't sufficient." },
+        ],
         detailedReplies: [
           { role: "Marketing · 2 Yrs", text: "This happened to me in my first year too. My manager said it was too vague — I ended up writing 'medical appointment' even though it wasn't.", job: "Marketing", yearNum: 2, likes: 24, dislikes: 2 },
           { role: "Dev · 5 Yrs",       text: "That's on the manager, not you. Personal reason is a valid reason. HR would back you up if it came to that.", job: "Dev", yearNum: 5, likes: 31, dislikes: 1 },
@@ -292,6 +311,9 @@ const CM_TRENDING_EN = [
 const CM_BOARDS_EN = [
   { name: 'All Boards',        latest: 'First greeting to new manager' },
   { name: 'Work Life Board',   latest: 'How to skip team dinner 2nd round' },
+  { name: 'Salary & Career',   latest: 'How to write a salary negotiation email' },
+  { name: 'Work Skills Board', latest: 'How to cut a report down to one page' },
+  { name: 'Office Politics',   latest: 'Do I really need to pick a manager’s side?' },
   { name: 'Hobbies Board',     latest: 'Weekend running crew forming' },
   { name: 'Dating & Marriage', latest: 'Dating a coworker — is it OK?' },
 ];
@@ -401,77 +423,68 @@ const SUMMARY_HEADLINES_EN = {
 function OpinionChat({ opinionCards }) {
   const { lang } = useLanguage();
   const t = translations[lang].community;
-  const [setIdx, setSetIdx] = useState(0);
-  // ANIMATION PAUSED FOR FIGMA CAPTURE — show all 3 messages immediately
-  const [msgCount, setMsgCount] = useState(3);
 
-  // useEffect(() => {
-  //   const timers = [];
-  //   let si = 0;
-  //   let mc = 0;
-  //   const step = () => {
-  //     if (mc < 3) {
-  //       mc++;
-  //       setMsgCount(mc);
-  //       timers.push(setTimeout(step, 1300));
-  //     } else {
-  //       timers.push(setTimeout(() => {
-  //         setMsgCount(0); mc = 0;
-  //         si = (si + 1) % opinionCards.length;
-  //         setSetIdx(si);
-  //         timers.push(setTimeout(step, 700));
-  //       }, 3200));
-  //     }
-  //   };
-  //   timers.push(setTimeout(step, 600));
-  //   return () => timers.forEach(clearTimeout);
-  // }, []);
-
-  const card = opinionCards[setIdx];
-  const allMsgs = [
-    { id: "post",    type: "post",    text: card.post.title, meta: null },
-    { id: "agree",   type: "agree",   text: card.agree.text,    meta: `${card.agree.role} · ${card.agree.year}` },
-    { id: "disagree",type: "disagree",text: card.disagree.text, meta: `${card.disagree.role} · ${card.disagree.year}` },
+  const card = opinionCards[0];
+  const voices = card.voices ?? [
+    { stance: "agree",    role: card.agree.role,    year: card.agree.year,    text: card.agree.text },
+    { stance: "disagree", role: card.disagree.role, year: card.disagree.year, text: card.disagree.text },
   ];
-  const visible = allMsgs.slice(0, msgCount);
+  const stanceStyle = {
+    agree:    { label: "#16A34A", labelBg: "#E7F6EC" },
+    disagree: { label: "#EF4444", labelBg: "#FFF0F0" },
+  };
 
-  const style = (type) => ({
-    post:     { bg: "#fff", border: "1px solid var(--line-2)", radius: "12px 12px 12px 3px",  align: "flex-start", text: "var(--ink)",   label: null,      labelBg: null      },
-    agree:    { bg: "#fff", border: "1px solid var(--line-2)", radius: "12px 12px 3px 12px",  align: "flex-end",   text: "var(--ink-2)", label: "#16A34A", labelBg: "#E7F6EC" },
-    disagree: { bg: "#fff", border: "1px solid var(--line-2)", radius: "12px 12px 3px 12px",  align: "flex-end",   text: "var(--ink-2)", label: "#EF4444", labelBg: "#FFF0F0" },
-  })[type];
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setIdx((i) => (i + 1) % voices.length), 3000);
+    return () => clearInterval(timer);
+  }, [voices.length]);
 
   return (
-    <div style={{ padding: "0 14px 2px", height: 220, overflow: "hidden" }}>
-      <AnimatePresence mode="sync">
-        {visible.map((msg) => {
-          const s = style(msg.type);
-          return (
-            <motion.div
-              key={`${setIdx}-${msg.id}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, transition: { duration: 0.22 } }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              style={{ display: "flex", justifyContent: s.align, marginBottom: 7 }}
-            >
-              <div style={{ background: s.bg, border: s.border, borderRadius: s.radius, padding: "8px 11px", maxWidth: "88%" }}>
-                {msg.meta && (
+    <div>
+      <div style={{ overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "stretch",
+            transform: `translateX(-${idx * 100}%)`,
+            transition: "transform .4s ease",
+          }}
+        >
+          {voices.map((v, i) => {
+            const s = stanceStyle[v.stance];
+            return (
+              <div key={i} style={{ flex: "0 0 100%", boxSizing: "border-box", padding: "0 14px" }}>
+                <div style={{ background: "#fff", border: "1px solid var(--line-2)", borderRadius: 12, padding: "8px 11px", boxSizing: "border-box" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, color: s.label, background: s.labelBg, padding: "1px 6px", borderRadius: 4 }}>
-                      {msg.type === "agree" ? t.agree : t.disagree}
+                      {v.stance === "agree" ? t.agree : t.disagree}
                     </span>
-                    <span style={{ fontSize: 10, color: "var(--muted-2)" }}>{msg.meta}</span>
+                    <span style={{ fontSize: 10, color: "var(--muted-2)" }}>{v.role} · {v.year}</span>
                   </div>
-                )}
-                <div style={{ fontSize: 12.5, fontWeight: msg.type === "post" ? 600 : 400, color: s.text, lineHeight: 1.5, wordBreak: "keep-all", overflowWrap: "break-word" }}>
-                  {msg.text}
+                  <div style={{ fontSize: 12.5, fontWeight: 400, color: "var(--ink-2)", lineHeight: 1.5, wordBreak: "keep-all", overflowWrap: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    {v.text}
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 10 }}>
+        {voices.map((_, i) => (
+          <span
+            key={i}
+            style={{
+              width: idx === i ? 16 : 5,
+              height: 5,
+              borderRadius: 99,
+              background: idx === i ? "var(--ink-2)" : "#CBD0D8",
+              transition: "width .2s, background .2s",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -506,7 +519,7 @@ function PostAvatar({ index }) {
   return (
     <span
       style={{
-        flexShrink: 0, width: 20, height: 20, borderRadius: 99,
+        flexShrink: 0, width: 16, height: 16, borderRadius: 99,
         background: colors[index % colors.length],
         display: "inline-flex", alignItems: "center", justifyContent: "center",
       }}
@@ -604,17 +617,28 @@ function ThreadCard({ thread: th, onAskAI, onOpenDetail, summaryHeadlines }) {
       }}
     >
       <div style={{ padding: "14px 14px 14px" }}>
-        <QASummary th={th} summaryHeadlines={summaryHeadlines} />
+        <QASummary th={th} summaryHeadlines={summaryHeadlines} showTags={false} />
       </div>
 
       <>
         <div style={{ padding: "0 14px 4px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+            {th.tags.map((tag) => (
+              <span key={tag} style={{ fontSize: 11.5, fontWeight: 600, color: "var(--muted)" }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div style={{ height: 1, background: "#F6F7FA", marginBottom: 12 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5" />
               <circle cx="17" cy="9" r="2.5" /><path d="M15 15c3 0 6 1.5 6 5" />
             </svg>
             <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-2)" }}>{t.communityOpinions}</span>
+          </div>
+          <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 500, color: "var(--ink)", lineHeight: 1.5, wordBreak: "keep-all", overflowWrap: "break-word" }}>
+            {th.opinionCards[0].post.title}
           </div>
           <button style={{ width: "100%", textAlign: "left", cursor: "pointer", background: "var(--line-2)", border: "1px solid var(--line)", borderRadius: 14, overflow: "hidden", padding: "14px 0" }}>
             <OpinionChat opinionCards={th.opinionCards} />
@@ -710,13 +734,32 @@ export default function CommunityScreen({ onAskAI }) {
           position: "relative", flexShrink: 0, zIndex: 20, background: "#fff",
         }}
       >
-        {detailTitle ? (
+        {selectedPost ? (
+          <>
+            <button
+              type="button"
+              aria-label={t.back}
+              onClick={() => setSelectedPost(null)}
+              style={{
+                position: "absolute", left: 20, top: 14, width: 34, height: 34,
+                borderRadius: 10, background: "#fff", display: "inline-flex",
+                alignItems: "center", justifyContent: "center", color: "var(--ink-2)", cursor: "pointer",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div style={{ height: 34, display: "inline-flex", alignItems: "center", fontSize: 17, fontWeight: 800, color: "var(--ink)", letterSpacing: "-.02em" }}>
+              {detailTitle}
+            </div>
+          </>
+        ) : detailTitle ? (
           <>
             <button
               type="button"
               aria-label={t.back}
               onClick={() => {
-                if (selectedPost)       { setSelectedPost(null);       return; }
                 if (selectedDiscussion) { setSelectedDiscussion(null); return; }
                 setSelectedBoard(null);
               }}
@@ -765,35 +808,35 @@ export default function CommunityScreen({ onAskAI }) {
       {/* Feed */}
       <div
         ref={feedRef}
-        style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: detailTitle ? "0 0 100px" : "14px 20px 100px" }}
+        style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: detailTitle ? "0" : "14px 20px 0" }}
       >
         {selectedPost ? (
           <div style={{ background: "#fff" }}>
             <article style={{ padding: "24px 20px 18px", borderBottom: "7px solid #F3F5FA" }}>
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 800, lineHeight: 1.38, letterSpacing: "-.025em", color: "var(--ink)" }}>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, lineHeight: 1.38, letterSpacing: "-.025em", color: "var(--ink)" }}>
                 {selectedPost.title}
               </p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 12 }}>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 7, minWidth: 0 }}>
                   {selectedPost.filterSummaries ? (
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: AVATAR_PALETTE[0], display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px -2px rgba(11,14,20,.14)" }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: AVATAR_PALETTE[0], display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <img src={faceImg} alt="" style={{ width: "62%", height: "62%", objectFit: "contain" }} />
                     </div>
                   ) : (
-                    <span style={{ width: 24, height: 24, borderRadius: 99, background: "#EEF1FF", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <img src={faceImg} alt="" style={{ width: 16, height: 16, objectFit: "contain" }} />
+                    <span style={{ width: 17, height: 17, borderRadius: 99, background: "#EEF1FF", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <img src={faceImg} alt="" style={{ width: 11, height: 11, objectFit: "contain" }} />
                     </span>
                   )}
-                  <span style={{ fontSize: 12.5, color: "var(--muted-2)", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {selectedPost.role}
                   </span>
                 </div>
-                <span style={{ fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600, flexShrink: 0 }}>{selectedPost.uploadedAt}</span>
+                <span style={{ fontSize: 12.5, color: "var(--muted-2)", fontWeight: 500, flexShrink: 0 }}>{selectedPost.uploadedAt}</span>
               </div>
               <p style={{ margin: "18px 0 0", fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", wordBreak: "keep-all" }}>
                 {selectedPost.body}
               </p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 32 }}>
                 <button
                   type="button"
                   onClick={() => onAskAI?.({ type: "community", title: selectedPost.title, meta: `${selectedPost.uploadedAt} · ${selectedPost.role}`, summary: selectedPost.preview, body: selectedPost.body })}
@@ -846,7 +889,7 @@ export default function CommunityScreen({ onAskAI }) {
 
             <section style={{ padding: "18px 20px 24px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "var(--ink)" }}>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>
                   {t.commentsLabel(filteredReplies.length)}
                 </p>
                 <button
@@ -950,19 +993,19 @@ export default function CommunityScreen({ onAskAI }) {
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: hasRichAvatar ? 10 : 7, marginBottom: 7 }}>
                         {hasRichAvatar ? (
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", background: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px -2px rgba(11,14,20,.14)" }}>
+                          <div style={{ width: 20, height: 20, borderRadius: "50%", background: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                             <img src={faceImg} alt="" style={{ width: "62%", height: "62%", objectFit: "contain" }} />
                           </div>
                         ) : (
-                          <span style={{ width: 22, height: 22, borderRadius: 99, background: "#EEF1FF", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <img src={faceImg} alt="" style={{ width: 15, height: 15, objectFit: "contain" }} />
+                          <span style={{ width: 16, height: 16, borderRadius: 99, background: "#EEF1FF", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <img src={faceImg} alt="" style={{ width: 10, height: 10, objectFit: "contain" }} />
                           </span>
                         )}
-                        <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--muted-2)" }}>{reply.role}</span>
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--muted-2)" }}>{reply.role}</span>
                       </div>
                       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "var(--ink-2)" }}>{reply.text}</p>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10 }}>
-                        <span style={{ fontSize: 12, color: "var(--muted-2)", fontWeight: 600 }}>
+                        <span style={{ fontSize: 12, color: "var(--muted-2)", fontWeight: 500 }}>
                           {reply.createdAt || t.commentTimes[index % t.commentTimes.length]}
                         </span>
                         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -993,8 +1036,10 @@ export default function CommunityScreen({ onAskAI }) {
 
         ) : selectedDiscussion ? (
           <div style={{ background: "#fff" }}>
-            <div style={{ padding: "18px 20px 16px", borderBottom: "7px solid #F3F5FA" }}>
-              <QASummary th={selectedDiscussion} summaryHeadlines={SUMMARY_HEADLINES} showTags={false} />
+            <div style={{ padding: "22px 20px 24px", borderBottom: "7px solid #F3F5FA", background: "var(--brand-soft)" }}>
+              <div style={{ background: "#fff", borderRadius: 14, border: "1px solid var(--line-2)", padding: "20px 16px" }}>
+                <QASummary th={selectedDiscussion} summaryHeadlines={SUMMARY_HEADLINES} showTags={false} />
+              </div>
             </div>
             <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--line)" }}>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--ink-2)" }}>{t.postsListTitle}</p>
@@ -1024,16 +1069,16 @@ export default function CommunityScreen({ onAskAI }) {
                     key={`${card.post.title}-${index}`}
                     type="button"
                     onClick={() => handlePostSelect(relatedPost)}
-                    style={{ width: "100%", textAlign: "left", background: "#fff", border: "none", borderBottom: "1px solid var(--line-2)", borderRadius: 0, padding: "16px 20px 13px", cursor: "pointer", boxShadow: "none" }}
+                    style={{ width: "100%", textAlign: "left", background: "#fff", border: "none", borderBottom: "1px solid var(--line-2)", borderRadius: 0, padding: "20px 20px 18px", cursor: "pointer", boxShadow: "none" }}
                   >
-                    <p style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{relatedPost.title}</p>
+                    <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{relatedPost.title}</p>
                     <p style={{ margin: "6px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{relatedPost.preview}</p>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 14, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 }}>
                         <PostAvatar index={index} />
-                        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{relatedPost.uploadedAt} | {relatedPost.role}</span>
+                        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>{relatedPost.role} | {relatedPost.uploadedAt}</span>
                       </div>
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0, fontWeight: 500 }}>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" /></svg>
                           {relatedPost.comments}
@@ -1057,13 +1102,13 @@ export default function CommunityScreen({ onAskAI }) {
                 key={`${post.title}-${index}`}
                 type="button"
                 onClick={() => handlePostSelect(post)}
-                style={{ width: "100%", textAlign: "left", background: "#fff", border: "none", borderBottom: "1px solid var(--line-2)", borderRadius: 0, padding: "16px 20px 13px", cursor: "pointer", boxShadow: "none" }}
+                style={{ width: "100%", textAlign: "left", background: "#fff", border: "none", borderBottom: "1px solid var(--line-2)", borderRadius: 0, padding: "20px 20px 18px", cursor: "pointer", boxShadow: "none" }}
               >
-                <p style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{post.title}</p>
+                <p style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35, color: "var(--ink)", margin: 0 }}>{post.title}</p>
                 <p style={{ margin: "6px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{post.preview}</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 14, fontSize: 12.5, color: "var(--muted-2)", fontWeight: 600 }}>
                   <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{post.uploadedAt} | {post.role}</span>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0, fontWeight: 500 }}>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H6a2 2 0 0 1-2-2V6z" /></svg>
                       {post.comments}

@@ -97,7 +97,7 @@ function Header({ points }) {
           <span
             style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)" }}
           >
-            {displayPoints} P
+            {displayPoints.toLocaleString()} P
           </span>
         </button>
         <button
@@ -499,7 +499,7 @@ function ArticleRow({ article, hero = false }) {
           <div
             style={{
               fontSize: 15,
-              fontWeight: 800,
+              fontWeight: 700,
               letterSpacing: "-.025em",
               color: "var(--ink)",
               lineHeight: 1.35,
@@ -573,7 +573,7 @@ function ArticleRow({ article, hero = false }) {
           <div
             style={{
               fontSize: 14,
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "-.02em",
               color: "var(--ink)",
               lineHeight: 1.35,
@@ -1127,7 +1127,7 @@ function TipCard({ tip }) {
         <div
           style={{
             fontSize: 13,
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: "-.015em",
             color: "var(--ink)",
             lineHeight: 1.4,
@@ -1334,8 +1334,8 @@ function PersonalizedCard({ onAskAI }) {
               </div>
               <div
                 style={{
-                  fontSize: 21,
-                  fontWeight: 800,
+                  fontSize: 24,
+                  fontWeight: 700,
                   color: "#fff",
                   letterSpacing: "-.035em",
                   lineHeight: 1.3,
@@ -1725,7 +1725,6 @@ export default function ContentScreen({ onAskAI }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        paddingBottom: 80,
         minHeight: "100%",
       }}
     >
@@ -1750,20 +1749,6 @@ export default function ContentScreen({ onAskAI }) {
 
       <Divider />
 
-      <Section title={t.wordSection.title} subtitle={t.wordSection.subtitle}>
-        <div style={{ padding: "0 24px" }}>
-          <WordCard
-            key={CD.CONTENT_WORDS[wordIndex % CD.CONTENT_WORDS.length].id}
-            word={CD.CONTENT_WORDS[wordIndex % CD.CONTENT_WORDS.length]}
-            onAskAI={onAskAI}
-            onNext={() => setWordIndex((i) => i + 1)}
-            onEarnPoint={handleEarnPoint}
-          />
-        </div>
-      </Section>
-
-      <Divider />
-
       <Section title={t.tipSection.title} subtitle={t.tipSection.subtitle}>
         <div
           style={{
@@ -1776,6 +1761,20 @@ export default function ContentScreen({ onAskAI }) {
           {CD.CONTENT_TIPS.map((tip) => (
             <TipCard key={tip.id} tip={tip} />
           ))}
+        </div>
+      </Section>
+
+      <Divider />
+
+      <Section title={t.wordSection.title} subtitle={t.wordSection.subtitle}>
+        <div style={{ padding: "0 24px" }}>
+          <WordCard
+            key={CD.CONTENT_WORDS[wordIndex % CD.CONTENT_WORDS.length].id}
+            word={CD.CONTENT_WORDS[wordIndex % CD.CONTENT_WORDS.length]}
+            onAskAI={onAskAI}
+            onNext={() => setWordIndex((i) => i + 1)}
+            onEarnPoint={handleEarnPoint}
+          />
         </div>
       </Section>
 
