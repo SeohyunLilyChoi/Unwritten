@@ -1056,7 +1056,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
               animate={{ height: showQuestionSummary ? "auto" : 0, opacity: showQuestionSummary ? 1 : 0 }}
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             >
-              <div className="relative py-5 bg-[#F8FAFE]">
+              <div className="relative py-5 bg-[#F3F6FC]">
                 <div className="relative z-10 flex items-center gap-2.5 px-5">
                   <span
                     style={{

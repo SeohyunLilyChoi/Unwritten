@@ -74,8 +74,8 @@ export const mockData = {
           },
         },
         communityPosts: [
-          { id: 5, title: 'The time I skipped a team dinner as a new hire', preview: 'I told my manager in advance and they were actually relieved. The team respected personal time.', role: 'Planning · 3 yrs', comments: 19, likes: 44 },
-          { id: 6, title: 'What do you think about forced team dinner attendance?', preview: "Things have changed, but some teams still give you a hard time for skipping.", role: 'Marketing · 6 yrs', comments: 41, likes: 88 },
+          { id: 5, title: 'The time I skipped a team dinner as a new hire', preview: 'I told my manager in advance and they were actually relieved. The team respected personal time.', role: 'Planning · 3 Yrs', comments: 19, likes: 44 },
+          { id: 6, title: 'What do you think about forced team dinner attendance?', preview: "Things have changed, but some teams still give you a hard time for skipping.", role: 'Marketing · 6 Yrs', comments: 41, likes: 88 },
         ],
       },
       followUps: [],
@@ -108,8 +108,8 @@ export const mockData = {
           },
         },
         communityPosts: [
-          { id: 3, title: 'How early do you arrive as a new hire?', preview: 'I also came too early my first week and felt awkward. 10 minutes early seems just right.', role: 'Dev · 2 yrs', comments: 34, likes: 67 },
-          { id: 4, title: "My manager said they don't like it when people come too early", preview: "My manager told me coming in too early made them feel pressured — just be on time.", role: 'HR · 4 yrs', comments: 28, likes: 51 },
+          { id: 3, title: 'How early do you arrive as a new hire?', preview: 'I also came too early my first week and felt awkward. 10 minutes early seems just right.', role: 'Dev · 2 Yrs', comments: 34, likes: 67 },
+          { id: 4, title: "My manager said they don't like it when people come too early", preview: "My manager told me coming in too early made them feel pressured — just be on time.", role: 'HR · 4 Yrs', comments: 28, likes: 51 },
         ],
       },
       followUps: [],
@@ -142,8 +142,8 @@ export const mockData = {
           },
         },
         communityPosts: [
-          { id: 1, title: 'The new hire who brought lunch every day', preview: "I felt awkward at first, but now even my manager brings lunch. Speaking up made the team more relaxed.", role: 'Marketing · 3 yrs', comments: 21, likes: 35 },
-          { id: 2, title: 'What do you think about eating lunch alone?', preview: "I was worried at first, but being honest about it opened things up. Turns out everyone prefers comfort.", role: 'Planning · 5 yrs', comments: 16, likes: 42 },
+          { id: 1, title: 'The new hire who brought lunch every day', preview: "I felt awkward at first, but now even my manager brings lunch. Speaking up made the team more relaxed.", role: 'Marketing · 3 Yrs', comments: 21, likes: 35 },
+          { id: 2, title: 'What do you think about eating lunch alone?', preview: "I was worried at first, but being honest about it opened things up. Turns out everyone prefers comfort.", role: 'Planning · 5 Yrs', comments: 16, likes: 42 },
         ],
       },
       followUps: [
@@ -195,8 +195,8 @@ export const MOCK_NEW_ANSWER = {
     },
   },
   communityPosts: [
-    { id: 101, title: 'I said no to overtime for the first time', preview: "I told my manager I had a prior commitment. They were fine with it — giving a heads-up early was the key.", role: 'Marketing · 2 yrs', comments: 18, likes: 41 },
-    { id: 102, title: 'Is refusing overtime actually okay?', preview: "Depends on your team, but flagging it early and showing you're on top of your workload goes a long way.", role: 'Dev · 4 yrs', comments: 27, likes: 55 },
+    { id: 101, title: 'I said no to overtime for the first time', preview: "I told my manager I had a prior commitment. They were fine with it — giving a heads-up early was the key.", role: 'Marketing · 2 Yrs', comments: 18, likes: 41 },
+    { id: 102, title: 'Is refusing overtime actually okay?', preview: "Depends on your team, but flagging it early and showing you're on top of your workload goes a long way.", role: 'Dev · 4 Yrs', comments: 27, likes: 55 },
   ],
 }
 

@@ -305,12 +305,12 @@ const CM_THREADS_EN = [
 
 const CM_TRENDING_EN = [
   '#SalaryNeg', '#RemoteWork', '#ManagerRelations',
-  '#OvertimeNo', '#WorkLifeBalance', '#TeamDinners',
+  '#NoOverTime', '#WorkLifeBalance', '#TeamDinners',
 ];
 
 const CM_BOARDS_EN = [
   { name: 'All Boards',        latest: 'First greeting to new manager' },
-  { name: 'Work Life Board',   latest: 'How to skip team dinner 2nd round' },
+  { name: 'Work-Life Board',   latest: 'Replying to messages after work hours' },
   { name: 'Salary & Career',   latest: 'How to write a salary negotiation email' },
   { name: 'Work Skills Board', latest: 'How to cut a report down to one page' },
   { name: 'Office Politics',   latest: 'Do I really need to pick a manager’s side?' },
