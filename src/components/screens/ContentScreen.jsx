@@ -8,6 +8,13 @@ import attendanceImg from "../images/attendance.png";
 import tipsImg from "../images/tips.png";
 import contestImg from "../images/contest.png";
 import faceImg from "../images/face.png";
+import thumb1Img from "../images/thumbnails/Q_thumb1.png";
+import thumb2Img from "../images/thumbnails/Q_thumb2.png";
+import thumb3Img from "../images/thumbnails/Q_thumb3.png";
+import thumb4Img from "../images/thumbnails/Q_thumb4.png";
+import rThumb1Img from "../images/thumbnails/R_thumb1.png";
+import rThumb2Img from "../images/thumbnails/R_thumb2.png";
+import rThumb3Img from "../images/thumbnails/R_thumb3.png";
 import { CONTENT_TYPES } from "../../data/contentData";
 import * as contentDataEn from "../../data/contentDataEn";
 import * as contentDataKo from "../../data/contentData";
@@ -441,7 +448,7 @@ function PollCard({ poll, onAskAI, onNext }) {
 }
 
 // ─── Article row ──────────────────────────────────────────────────────────────
-function ArticleRow({ article, hero = false }) {
+function ArticleRow({ article, hero = false, thumb }) {
   const { lang } = useLanguage();
   const t = translations[lang].content;
   const T = CONTENT_TYPES.article;
@@ -450,7 +457,7 @@ function ArticleRow({ article, hero = false }) {
       <div
         style={{
           background: "#fff",
-          border: "1px solid var(--line-2)",
+          border: "1px solid #E1E2E8",
           borderRadius: 16,
           overflow: "hidden",
         }}
@@ -460,8 +467,22 @@ function ArticleRow({ article, hero = false }) {
             height: 148,
             background: article.cover,
             position: "relative",
+            overflow: "hidden",
           }}
         >
+          {thumb && (
+            <img
+              src={thumb}
+              alt=""
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          )}
           <div style={{ position: "absolute", left: 12, top: 12 }}>
             <span
               style={{
@@ -534,7 +555,7 @@ function ArticleRow({ article, hero = false }) {
         display: "flex",
         gap: 12,
         background: "#fff",
-        border: "1px solid var(--line-2)",
+        border: "1px solid #E1E2E8",
         borderRadius: 14,
         padding: 12,
         alignItems: "stretch",
@@ -547,8 +568,24 @@ function ArticleRow({ article, hero = false }) {
           borderRadius: 10,
           background: article.cover,
           flexShrink: 0,
+          overflow: "hidden",
+          position: "relative",
         }}
-      />
+      >
+        {thumb && (
+          <img
+            src={thumb}
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+      </div>
       <div
         style={{
           flex: 1,
@@ -1110,19 +1147,30 @@ function WordCard({ word, onAskAI, onNext, onEarnPoint }) {
 }
 
 // ─── Tip card ─────────────────────────────────────────────────────────────────
-function TipCard({ tip }) {
+function TipCard({ tip, thumb }) {
   return (
     <div
       style={{
         background: "#fff",
-        border: "1px solid var(--line-2)",
+        border: "1px solid #E1E2E8",
         borderRadius: 14,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div style={{ height: 92, background: tip.cover }} />
+      <div style={{ height: 92, background: tip.cover }}>
+        <img
+          src={thumb}
+          alt=""
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center top",
+          }}
+        />
+      </div>
       <div style={{ padding: "10px 11px 11px" }}>
         <div
           style={{
@@ -1758,8 +1806,12 @@ export default function ContentScreen({ onAskAI }) {
             padding: "0 24px",
           }}
         >
-          {CD.CONTENT_TIPS.map((tip) => (
-            <TipCard key={tip.id} tip={tip} />
+          {CD.CONTENT_TIPS.map((tip, i) => (
+            <TipCard
+              key={tip.id}
+              tip={tip}
+              thumb={[thumb1Img, thumb2Img, thumb3Img, thumb4Img][i]}
+            />
           ))}
         </div>
       </Section>
@@ -1790,7 +1842,12 @@ export default function ContentScreen({ onAskAI }) {
           }}
         >
           {CD.CONTENT_ARTICLES.map((a, i) => (
-            <ArticleRow key={a.id} article={a} hero={i === 0} />
+            <ArticleRow
+              key={a.id}
+              article={a}
+              hero={i === 0}
+              thumb={[rThumb1Img, rThumb2Img, rThumb3Img][i]}
+            />
           ))}
         </div>
       </Section>
