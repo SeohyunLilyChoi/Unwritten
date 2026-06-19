@@ -31,7 +31,7 @@ export default function MyPageScreen() {
         <div>
           <p className="text-lg font-extrabold text-gray-900">{nickname}</p>
           <p className="text-base font-bold text-gray-500 mt-0.5">{t.profile.role}</p>
-          <p className="text-sm text-gray-400 mt-0.5">lily_choi7@snu.ac.kr</p>
+          <p className="text-sm text-gray-400 mt-0.5">user@example.com</p>
         </div>
         <button className="text-xs font-medium text-brand-blue bg-brand-blue-light px-3 py-1.5 rounded-full">
           {t.profile.editBtn}

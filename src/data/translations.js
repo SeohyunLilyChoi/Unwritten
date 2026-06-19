@@ -3,7 +3,7 @@ export const translations = {
     tabs: { home: 'Ask', content: 'Content', community: 'Community', mypage: 'Profile' },
 
     myPage: {
-      title: 'My Page',
+      title: 'Profile',
       profile: { role: 'Planning · 3 Years', editBtn: 'Edit Profile' },
       stats: { points: 'Points', posts: 'Posts', bestAnswer: 'Best Answers' },
       insight: { label: 'My Activity Insights', body: 'You tend to ask a lot about <strong>organizational culture</strong>.' },
