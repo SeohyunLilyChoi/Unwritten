@@ -19,25 +19,28 @@ import { CONTENT_TYPES } from "../../data/contentData";
 import * as contentDataEn from "../../data/contentDataEn";
 import * as contentDataKo from "../../data/contentData";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { usePoints } from "../../contexts/PointsContext";
 import { translations } from "../../data/translations";
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 function Header({ points }) {
   const [displayPoints, setDisplayPoints] = useState(points);
-  const displayRef = useRef(points);
-  const timerRef = useRef(null);
-  const isFirstRender = useRef(true);
+  const prevPointsRef = useRef(points);
 
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return; }
-    if (timerRef.current) clearInterval(timerRef.current);
+    const start = prevPointsRef.current;
     const end = points;
-    timerRef.current = setInterval(() => {
-      displayRef.current += 1;
-      setDisplayPoints(displayRef.current);
-      if (displayRef.current >= end) clearInterval(timerRef.current);
+    if (start === end) return;
+    let current = start;
+    const timer = setInterval(() => {
+      current += 1;
+      setDisplayPoints(current);
+      if (current >= end) {
+        clearInterval(timer);
+        prevPointsRef.current = end;
+      }
     }, 28);
-    return () => clearInterval(timerRef.current);
+    return () => clearInterval(timer);
   }, [points]);
 
   return (
@@ -1759,9 +1762,7 @@ export default function ContentScreen({ onAskAI }) {
 
   const [pollIndex, setPollIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
-  const [points, setPoints] = useState(1240);
-
-  const handleEarnPoint = (p) => setPoints((prev) => prev + p);
+  const { points, earnPoints } = usePoints();
 
   const currentPoll =
     CD.CONTENT_POLLS.length > 0
@@ -1825,7 +1826,7 @@ export default function ContentScreen({ onAskAI }) {
             word={CD.CONTENT_WORDS[wordIndex % CD.CONTENT_WORDS.length]}
             onAskAI={onAskAI}
             onNext={() => setWordIndex((i) => i + 1)}
-            onEarnPoint={handleEarnPoint}
+            onEarnPoint={earnPoints}
           />
         </div>
       </Section>

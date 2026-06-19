@@ -5,6 +5,7 @@ import ContentScreen from './components/screens/ContentScreen'
 import CommunityScreen from './components/screens/CommunityScreen'
 import MyPageScreen from './components/screens/MyPageScreen'
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
+import { PointsProvider } from './contexts/PointsContext'
 
 function AppScreens() {
   const initTab = new URLSearchParams(location.hash.slice(1)).get('tab') || 'home'
@@ -77,7 +78,9 @@ function AppScreens() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppScreens />
+      <PointsProvider>
+        <AppScreens />
+      </PointsProvider>
     </LanguageProvider>
   )
 }

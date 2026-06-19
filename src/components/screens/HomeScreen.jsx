@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as mockDataKo from "../../data/mockData";
 import * as mockDataEn from "../../data/mockDataEn";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { usePoints } from "../../contexts/PointsContext";
 import faceImg from "../images/face.png";
 import { translations } from "../../data/translations";
 import keyboardImg from "../images/Keyboard - iPhone.png";
@@ -917,6 +918,7 @@ let nextId = 100;
 
 export default function HomeScreen({ prefillContent, onClearPrefill }) {
   const { lang, nickname } = useLanguage();
+  const { points } = usePoints();
   const t = translations[lang].home;
   const MD = lang === "en" ? mockDataEn : mockDataKo;
 
@@ -1027,7 +1029,7 @@ export default function HomeScreen({ prefillContent, onClearPrefill }) {
                   <circle cx="12" cy="12" r="10" fill="var(--brand)" />
                   <text x="12" y="16.5" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff" fontFamily="inherit">P</text>
                 </svg>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)" }}>1,240 P</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--brand)" }}>{points.toLocaleString()} P</span>
               </button>
               <button onClick={() => setSearching((s) => !s)} className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center transition-colors ${searching ? "text-brand-blue bg-brand-blue-light" : "text-gray-500 bg-white"}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
