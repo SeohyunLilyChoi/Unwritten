@@ -838,7 +838,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
             style={{ bottom: suggestionsBottom, transition: "bottom 0.25s ease" }}
           >
             <div className="flex flex-col items-start gap-2">
-              <p className="mb-1 text-[28px] font-extrabold text-white leading-snug">
+              <p className="mb-1 text-[24px] font-extrabold text-white leading-snug">
   <span style={{ background: "rgba(11,14,20,0.38)", padding: "2px 8px", boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" }}>
     {suggestedLabel}
   </span>
@@ -848,7 +848,7 @@ function BottomComposer({ onSubmit, prefillContent, onClearPrefill, onOpenAttach
                   key={question} type="button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => handleSuggestionClick(question)}
-                  className="w-4/5 rounded-xl border border-[#E1E6F2] bg-white px-3.5 py-3 text-left text-sm font-semibold leading-snug text-gray-700 shadow-sm transition-colors active:bg-brand-blue-light"
+                  className="w-full rounded-xl border border-[#E1E6F2] bg-white px-3.5 py-3 text-left text-sm font-semibold leading-snug text-gray-700 shadow-sm transition-colors active:bg-brand-blue-light"
                 >
                   {question}
                 </button>
